@@ -497,7 +497,8 @@ With most things in R, there's a package to help minimize the pain of working wi
 
 As a reminder, to get started using the `here` package (or any R package!), it first has to be installed (using the `install.packages()` function) and then loaded in (using the `library()` function). Note that the package name in the `install.packages()` function has to be in quotes but for `library()` it doesn't have to. The code to copy and paste into your R console is below:
 
-```{r eval = FALSE}
+
+```r
 install.packages("here")
 library(here)
 ```
@@ -532,7 +533,8 @@ After setting your project folder using `here()`, R will then know what folder t
 
 For example, if you wanted to include a path to a file named "intro_code.R" in your `raw_code` directory, you would simply specify that in your code like this:
 
-```{r eval = FALSE}
+
+```r
 here("code", "raw_code", "intro_code.R")
 ```
 
@@ -547,17 +549,20 @@ The output from this code includes the correct file path to this file, just as y
 ####Save and load files using `here()`
 Files within the project can be saved or loaded by simply typing `here` (to replace the path to the project directory) and typing any subdirectories like in this example where we want to save data to the raw_data directory within the data directory of the project: 
 
-```{r eval = FALSE}
+
+```r
 save(introcode_data_object, file = here("data", "raw_data", "intro_code_object.R"))
 ```
 
 Or if we want to load this data:
-```{r, eval = FALSE}
+
+```r
 load(here("data", "raw_data", "intro_code_object.R"))
 ```
 
 This is equivalent to:
-```{r, eval = FALSE}
+
+```r
 load(here("data/raw_data/intro_code_object.R"))
 ```
 

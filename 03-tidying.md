@@ -55,15 +55,31 @@ Within the tidyverse, [tidyr](https://tidyr.tidyverse.org/) is the go-to package
 For these examples, we'll work with the `airquality` dataset available in R. The data in this dataset includes "Daily air quality measurements in New York, May to September 1973." This is a wide dataset because each day is in a separate row and there are multiple columns with each including information about a different variable (ozone, solar.r, wind, temp, month, and day). 
 
 We'll load in the tidyverse, so that we can convert this data.frame to a tibble *and* see the first few lines of this dataset using the following code:
-```{r include = FALSE}
-library(rvest)
-```
 
-```{r message = FALSE}
+
+
+```r
 library(tidyverse)
 
 airquality <- as_tibble(airquality)
 airquality
+```
+
+```
+## # A tibble: 153 x 6
+##    Ozone Solar.R  Wind  Temp Month   Day
+##    <int>   <int> <dbl> <int> <int> <int>
+##  1    41     190   7.4    67     5     1
+##  2    36     118   8      72     5     2
+##  3    12     149  12.6    74     5     3
+##  4    18     313  11.5    62     5     4
+##  5    NA      NA  14.3    56     5     5
+##  6    28      NA  14.9    66     5     6
+##  7    23     299   8.6    65     5     7
+##  8    19      99  13.8    59     5     8
+##  9     8      19  20.1    61     5     9
+## 10    NA     194   8.6    69     5    10
+## # … with 143 more rows
 ```
 
 Again, wide data are easy to decipher at a glance. We can see that we have six different variables for each day, with each one of these variables (measurements) being stored in a separate column.
@@ -84,7 +100,8 @@ As data are often stored in wide formats, you'll likely use `gather()` a lot mor
 
 In `tidyr`, `gather()` will take the `airquality` dataset from wide to long, putting each column name into the first column and each corresponding value into the second column. Here, the first column will be called `key`. The second column will still be `value`.
 
-```{r}
+
+```r
 ## use gather() to reshape from wide to long
 gathered <- gather(airquality)
 
@@ -92,11 +109,29 @@ gathered <- gather(airquality)
 gathered
 ```
 
+```
+## # A tibble: 918 x 2
+##    key   value
+##    <chr> <dbl>
+##  1 Ozone    41
+##  2 Ozone    36
+##  3 Ozone    12
+##  4 Ozone    18
+##  5 Ozone    NA
+##  6 Ozone    28
+##  7 Ozone    23
+##  8 Ozone    19
+##  9 Ozone     8
+## 10 Ozone    NA
+## # … with 908 more rows
+```
+
 ![gather dataset](https://docs.google.com/presentation/d/14msuN3MbQE6BSIaNu2ipv1-5ypgvWlxsGwn3jmpFyAI/export/png?id=14msuN3MbQE6BSIaNu2ipv1-5ypgvWlxsGwn3jmpFyAI&pageid=g38bb68a532_0_205)
 
 However, it's very easy to change the names of these columns within `gather()`. To do so you define what the key and value columns names should be within `gather()`:
 
-```{r}
+
+```r
 ## to rename the column names that gather provides,
 ## change key and value to what you want those column names to be
 gathered <- gather(airquality, key = "variable", value = "value")
@@ -105,11 +140,29 @@ gathered <- gather(airquality, key = "variable", value = "value")
 gathered 
 ```
 
+```
+## # A tibble: 918 x 2
+##    variable value
+##    <chr>    <dbl>
+##  1 Ozone       41
+##  2 Ozone       36
+##  3 Ozone       12
+##  4 Ozone       18
+##  5 Ozone       NA
+##  6 Ozone       28
+##  7 Ozone       23
+##  8 Ozone       19
+##  9 Ozone        8
+## 10 Ozone       NA
+## # … with 908 more rows
+```
+
 ![gather column names changed](https://docs.google.com/presentation/d/14msuN3MbQE6BSIaNu2ipv1-5ypgvWlxsGwn3jmpFyAI/export/png?id=14msuN3MbQE6BSIaNu2ipv1-5ypgvWlxsGwn3jmpFyAI&pageid=g38bb68a532_0_213)
 
 However, you're likely not interested in your day and month variable being separated out into their own variables within the `key` column. In fact, knowing the day and month associated with a particular data point helps identify that particular data point. To account for this, you can exclude `day` and `month` from the variables being included in the `key` column by specifying all the variables that you *do* want included in the `key` column.  Here, that means specifying `Ozone`, `Solar.R`, `Wind`, and `Temp`. This will keep `Day` and `Month` in their own columns, allowing each row to be identified by the specific day and month being discussed.
 
-```{r}
+
+```r
 ## in gather(), after key and value, you can specify which variables 
 ## you want included in the long format
 ## it will leave the other variables as is
@@ -117,6 +170,23 @@ gathered <- gather(airquality, key="variable", value="value", Ozone, Solar.R, Wi
 
 ## take a look at first few rows of long data
 gathered
+```
+
+```
+## # A tibble: 612 x 4
+##    Month   Day variable value
+##    <int> <int> <chr>    <dbl>
+##  1     5     1 Ozone       41
+##  2     5     2 Ozone       36
+##  3     5     3 Ozone       12
+##  4     5     4 Ozone       18
+##  5     5     5 Ozone       NA
+##  6     5     6 Ozone       28
+##  7     5     7 Ozone       23
+##  8     5     8 Ozone       19
+##  9     5     9 Ozone        8
+## 10     5    10 Ozone       NA
+## # … with 602 more rows
 ```
 
 ![gather specifying which variables to include in long format](https://docs.google.com/presentation/d/14msuN3MbQE6BSIaNu2ipv1-5ypgvWlxsGwn3jmpFyAI/export/png?id=14msuN3MbQE6BSIaNu2ipv1-5ypgvWlxsGwn3jmpFyAI&pageid=g38bb68a532_0_222)
@@ -127,15 +197,52 @@ Now, when you look at the top of this object, you'll see that `Month` and `Day` 
 
 To return your long data back to its original form, you can use `spread()`. Here you specify two columns: the column that contains the names of what your wide data columns should be (`key = variable`) and the column that contains the values that should go in these columns (`value = value`). The data frame resulting from `spread()` will have the original information back in the wide format (again, the columns will be in a different order). But, we'll discuss how to rearrange data in the next lesson!
 
-```{r}
+
+```r
 ## use gather() to reshape from wide to long
 spread_data <- spread(gathered, key = variable, value = value)
 
 ## take a look at the spread data
 spread_data
+```
 
+```
+## # A tibble: 153 x 6
+##    Month   Day Ozone Solar.R  Temp  Wind
+##    <int> <int> <dbl>   <dbl> <dbl> <dbl>
+##  1     5     1    41     190    67   7.4
+##  2     5     2    36     118    72   8  
+##  3     5     3    12     149    74  12.6
+##  4     5     4    18     313    62  11.5
+##  5     5     5    NA      NA    56  14.3
+##  6     5     6    28      NA    66  14.9
+##  7     5     7    23     299    65   8.6
+##  8     5     8    19      99    59  13.8
+##  9     5     9     8      19    61  20.1
+## 10     5    10    NA     194    69   8.6
+## # … with 143 more rows
+```
+
+```r
 ## compare that back to the original
 airquality
+```
+
+```
+## # A tibble: 153 x 6
+##    Ozone Solar.R  Wind  Temp Month   Day
+##    <int>   <int> <dbl> <int> <int> <int>
+##  1    41     190   7.4    67     5     1
+##  2    36     118   8      72     5     2
+##  3    12     149  12.6    74     5     3
+##  4    18     313  11.5    62     5     4
+##  5    NA      NA  14.3    56     5     5
+##  6    28      NA  14.9    66     5     6
+##  7    23     299   8.6    65     5     7
+##  8    19      99  13.8    59     5     8
+##  9     8      19  20.1    61     5     9
+## 10    NA     194   8.6    69     5    10
+## # … with 143 more rows
 ```
 
 ![spread data](https://docs.google.com/presentation/d/14msuN3MbQE6BSIaNu2ipv1-5ypgvWlxsGwn3jmpFyAI/export/png?id=14msuN3MbQE6BSIaNu2ipv1-5ypgvWlxsGwn3jmpFyAI&pageid=g38bb68a532_0_236)
@@ -182,7 +289,8 @@ The third package we'll include here is the `janitor` package. While not a core 
 
 If you have not already, you'll want to be sure this package is installed and loaded:
 
-```{r message = FALSE}
+
+```r
 #install.packages('janitor')
 library(janitor)
 ```
@@ -197,7 +305,8 @@ The final package we'll discuss here is the `skimr` package. This package provid
 
 If you have not already, you'll want to be sure this package is installed and loaded:
 
-```{r  message = FALSE}
+
+```r
 #install.packages('skimr')
 library(skimr)
 ```
@@ -261,7 +370,8 @@ For the examples below, we'll be using a dataset from the `ggplot2` package call
 
 To get an idea of what variables are included in this data frame, you can use `glimpse()`. This function summarizes how many rows there are (`Observations`) and how many columns there are (`Variables`). Additionally, it gives you a glimpse into the type of data contained in each column. Specifically, in this data set, we know that the first column is `name` and that it contains a character vector (`chr`) and that the first three entries are "Cheetah", "Owl monkey", and "Mountain beaver." It works similarly to the `summary()` function covered in an earlier course.
 
-```{r eval = FALSE}
+
+```r
 ## take a look at the data
 glimpse(msleep)
 ```
@@ -272,18 +382,58 @@ glimpse(msleep)
 
 If you were only interested in learning more about the sleep times of "Primates," we could filter this dataset to include only data about those mammals that are also Primates. As we can see from `glimpse()`, this information is contained within the `order` variable. So to do this within R, we use the following syntax:
 
-```{r}
+
+```r
 # filter to only include primates
 msleep %>%
   filter(order == "Primates")
+```
+
+```
+## # A tibble: 12 x 11
+##    name  genus vore  order conservation sleep_total sleep_rem sleep_cycle
+##    <chr> <chr> <chr> <chr> <chr>              <dbl>     <dbl>       <dbl>
+##  1 Owl … Aotus omni  Prim… <NA>                17         1.8      NA    
+##  2 Griv… Cerc… omni  Prim… lc                  10         0.7      NA    
+##  3 Pata… Eryt… omni  Prim… lc                  10.9       1.1      NA    
+##  4 Gala… Gala… omni  Prim… <NA>                 9.8       1.1       0.55 
+##  5 Human Homo  omni  Prim… <NA>                 8         1.9       1.5  
+##  6 Mong… Lemur herbi Prim… vu                   9.5       0.9      NA    
+##  7 Maca… Maca… omni  Prim… <NA>                10.1       1.2       0.75 
+##  8 Slow… Nyct… carni Prim… <NA>                11        NA        NA    
+##  9 Chim… Pan   omni  Prim… <NA>                 9.7       1.4       1.42 
+## 10 Babo… Papio omni  Prim… <NA>                 9.4       1         0.667
+## 11 Potto Pero… omni  Prim… lc                  11        NA        NA    
+## 12 Squi… Saim… omni  Prim… <NA>                 9.6       1.4      NA    
+## # … with 3 more variables: awake <dbl>, brainwt <dbl>, bodywt <dbl>
 ```
 
 Note that we are using the equality `==` comparison operator that you learned about in the previous course. Also note that we have used the pipe operator to feed the `msleep` data frame into the `filter()` function. 
 
 The above is shorthand for:
 
-```{r}
+
+```r
 filter(msleep, order == "Primates")
+```
+
+```
+## # A tibble: 12 x 11
+##    name  genus vore  order conservation sleep_total sleep_rem sleep_cycle
+##    <chr> <chr> <chr> <chr> <chr>              <dbl>     <dbl>       <dbl>
+##  1 Owl … Aotus omni  Prim… <NA>                17         1.8      NA    
+##  2 Griv… Cerc… omni  Prim… lc                  10         0.7      NA    
+##  3 Pata… Eryt… omni  Prim… lc                  10.9       1.1      NA    
+##  4 Gala… Gala… omni  Prim… <NA>                 9.8       1.1       0.55 
+##  5 Human Homo  omni  Prim… <NA>                 8         1.9       1.5  
+##  6 Mong… Lemur herbi Prim… vu                   9.5       0.9      NA    
+##  7 Maca… Maca… omni  Prim… <NA>                10.1       1.2       0.75 
+##  8 Slow… Nyct… carni Prim… <NA>                11        NA        NA    
+##  9 Chim… Pan   omni  Prim… <NA>                 9.7       1.4       1.42 
+## 10 Babo… Papio omni  Prim… <NA>                 9.4       1         0.667
+## 11 Potto Pero… omni  Prim… lc                  11        NA        NA    
+## 12 Squi… Saim… omni  Prim… <NA>                 9.6       1.4      NA    
+## # … with 3 more variables: awake <dbl>, brainwt <dbl>, bodywt <dbl>
 ```
 
 The output is the same as above here, but the code is slightly less readable. This is why we use the pipe (`%>%`)!
@@ -294,9 +444,22 @@ Now, we have a smaller dataset of only 12 mammals (as opposed to the original 83
 
 But, what if we were only interested in Primates who sleep more than 10 hours total per night? This information is in the `sleep_total` column. Fortunately, `filter()` also works on numeric variables. To accomplish this, you would use the following syntax, separating the multiple filters you want to apply with a comma:
 
-```{r}
+
+```r
 msleep %>%
   filter(order == "Primates", sleep_total > 10)
+```
+
+```
+## # A tibble: 5 x 11
+##   name  genus vore  order conservation sleep_total sleep_rem sleep_cycle
+##   <chr> <chr> <chr> <chr> <chr>              <dbl>     <dbl>       <dbl>
+## 1 Owl … Aotus omni  Prim… <NA>                17         1.8       NA   
+## 2 Pata… Eryt… omni  Prim… lc                  10.9       1.1       NA   
+## 3 Maca… Maca… omni  Prim… <NA>                10.1       1.2        0.75
+## 4 Slow… Nyct… carni Prim… <NA>                11        NA         NA   
+## 5 Potto Pero… omni  Prim… lc                  11        NA         NA   
+## # … with 3 more variables: awake <dbl>, brainwt <dbl>, bodywt <dbl>
 ```
 
 Note that we have used the "greater than" comparison operator with `sleep_total`.
@@ -307,9 +470,22 @@ Now, we have a dataset focused in on only 5 mammals, all of which are primates w
 
 We can obtain the same result with the AND `&` logical operator instead of separating filtering conditions with a comma:
 
-```{r}
+
+```r
 msleep %>%
   filter(order == "Primates" & sleep_total > 10)
+```
+
+```
+## # A tibble: 5 x 11
+##   name  genus vore  order conservation sleep_total sleep_rem sleep_cycle
+##   <chr> <chr> <chr> <chr> <chr>              <dbl>     <dbl>       <dbl>
+## 1 Owl … Aotus omni  Prim… <NA>                17         1.8       NA   
+## 2 Pata… Eryt… omni  Prim… lc                  10.9       1.1       NA   
+## 3 Maca… Maca… omni  Prim… <NA>                10.1       1.2        0.75
+## 4 Slow… Nyct… carni Prim… <NA>                11        NA         NA   
+## 5 Potto Pero… omni  Prim… lc                  11        NA         NA   
+## # … with 3 more variables: awake <dbl>, brainwt <dbl>, bodywt <dbl>
 ```
 
 Note that the number of columns hasn't changed. All 11 variables are still shown in columns because the function `filter()` filters on rows, not columns.
@@ -320,10 +496,22 @@ While `filter()` operates on rows, it *is* possible to filter your dataset to on
 
 Let's start with the code we just wrote to only include primates who sleep a lot. What if we only want to include the first column (the name of the mammal) and the sleep information (included in the columns `sleep_total`, `sleep_rem`, and `sleep_cycle`)? We would do this by starting with the code we just used, adding another pipe, and using the function `select()`. Within `select`, we specify which columns we want in our output.
 
-```{r}
+
+```r
 msleep %>%
   filter(order == "Primates", sleep_total > 10) %>%
   select(name, sleep_total, sleep_rem, sleep_cycle)
+```
+
+```
+## # A tibble: 5 x 4
+##   name         sleep_total sleep_rem sleep_cycle
+##   <chr>              <dbl>     <dbl>       <dbl>
+## 1 Owl monkey          17         1.8       NA   
+## 2 Patas monkey        10.9       1.1       NA   
+## 3 Macaque             10.1       1.2        0.75
+## 4 Slow loris          11        NA         NA   
+## 5 Potto               11        NA         NA
 ```
 
 
@@ -331,7 +519,8 @@ msleep %>%
 
 Now, using `select()` we see that we still have the five rows we filtered to before, but we only have the four columns specified using `select()`. Here you can hopefully see the power of the pipe operator to chain together several commands in a row. Without the pipe operator, the full command would look like this:
 
-```{r eval = FALSE}
+
+```r
 select(filter(msleep, order == "Primates", sleep_total > 10), name, sleep_total, sleep_rem, sleep_cycle)
 ```
 
@@ -341,20 +530,45 @@ Yuck. Definitely harder to read. We'll stick with the above approach!
 
 `select()` can also be used to rename columns. To do so, you use the syntax: `new_column_name = old_column_name` within `select`. For example, to select the same columns and rename them `total`, `rem` and `cycle`, you would use the following syntax:
 
-```{r}
+
+```r
 msleep %>%
   filter(order == "Primates", sleep_total > 10) %>%
   select(name, total = sleep_total, rem = sleep_rem, cycle = sleep_cycle)
+```
+
+```
+## # A tibble: 5 x 4
+##   name         total   rem cycle
+##   <chr>        <dbl> <dbl> <dbl>
+## 1 Owl monkey    17     1.8 NA   
+## 2 Patas monkey  10.9   1.1 NA   
+## 3 Macaque       10.1   1.2  0.75
+## 4 Slow loris    11    NA   NA   
+## 5 Potto         11    NA   NA
 ```
 
 ![Data with renamed columns names with `select()`](https://docs.google.com/presentation/d/1Z1pukaF-HrZHEwSfr3SV8N2Slo2rMEJxpgl1qJv-QL4/export/png?id=1Z1pukaF-HrZHEwSfr3SV8N2Slo2rMEJxpgl1qJv-QL4&pageid=g38bb68a535_0_194)
 
 It's important to keep in mind that when using `select()` to rename columns, only the specified columns will be included and renamed in the output. If you, instead, want to change the names of a few columns but return *all* columns in your output, you'll want to use `rename()`. For example, the following, returns a data frame with all 11 columns, where the column names for three columns specified within `rename()` function have been renamed.
 
-```{r}
+
+```r
 msleep %>%
   filter(order == "Primates", sleep_total > 10) %>%
   rename(total = sleep_total, rem = sleep_rem, cycle = sleep_cycle)
+```
+
+```
+## # A tibble: 5 x 11
+##   name  genus vore  order conservation total   rem cycle awake brainwt
+##   <chr> <chr> <chr> <chr> <chr>        <dbl> <dbl> <dbl> <dbl>   <dbl>
+## 1 Owl … Aotus omni  Prim… <NA>          17     1.8 NA      7    0.0155
+## 2 Pata… Eryt… omni  Prim… lc            10.9   1.1 NA     13.1  0.115 
+## 3 Maca… Maca… omni  Prim… <NA>          10.1   1.2  0.75  13.9  0.179 
+## 4 Slow… Nyct… carni Prim… <NA>          11    NA   NA     13    0.0125
+## 5 Potto Pero… omni  Prim… lc            11    NA   NA     13   NA     
+## # … with 1 more variable: bodywt <dbl>
 ```
 
 ![Data with renamed columns names using `rename()`](https://docs.google.com/presentation/d/1Z1pukaF-HrZHEwSfr3SV8N2Slo2rMEJxpgl1qJv-QL4/export/png?id=1Z1pukaF-HrZHEwSfr3SV8N2Slo2rMEJxpgl1qJv-QL4&pageid=g4518ccec72_0_0)
@@ -367,10 +581,22 @@ In addition to filtering rows and columns, often, you'll want the data arranged 
 
 The `select()` function is powerful. Not only will it filter and rename columns, but it can also be used to reorder your columns. Using our example from above, if you wanted `sleep_rem` to be the first sleep column and `sleep_total` to be the last column, all you have to do is reorder them within `select()`. The output from `select()` would then be reordered to match the order specified within `select()`.
 
-```{r}
+
+```r
 msleep %>%
   filter(order == "Primates", sleep_total > 10) %>%
   select(name, sleep_rem, sleep_cycle, sleep_total)
+```
+
+```
+## # A tibble: 5 x 4
+##   name         sleep_rem sleep_cycle sleep_total
+##   <chr>            <dbl>       <dbl>       <dbl>
+## 1 Owl monkey         1.8       NA           17  
+## 2 Patas monkey       1.1       NA           10.9
+## 3 Macaque            1.2        0.75        10.1
+## 4 Slow loris        NA         NA           11  
+## 5 Potto             NA         NA           11
 ```
 
 Here we see that sleep_rem `name` is displayed first followed by `sleep_rem`, `sleep_cycle`, and `sleep_total`, just as it was specified within `select()`. 
@@ -381,22 +607,46 @@ Here we see that sleep_rem `name` is displayed first followed by `sleep_rem`, `s
 
 Rows can also be reordered. To reorder a variable in ascending order (from smallest to largest), you'll want to use `arrange()`. Continuing on from our example above, to now sort our rows by the amount of total sleep each mammal gets, we would use the following syntax:
 
-```{r}
+
+```r
 msleep %>%
   filter(order == "Primates", sleep_total > 10) %>%
   select(name, sleep_rem, sleep_cycle, sleep_total) %>%
   arrange(sleep_total)
 ```
 
+```
+## # A tibble: 5 x 4
+##   name         sleep_rem sleep_cycle sleep_total
+##   <chr>            <dbl>       <dbl>       <dbl>
+## 1 Macaque            1.2        0.75        10.1
+## 2 Patas monkey       1.1       NA           10.9
+## 3 Slow loris        NA         NA           11  
+## 4 Potto             NA         NA           11  
+## 5 Owl monkey         1.8       NA           17
+```
+
 ![Data arranged by total sleep in ascending order](https://docs.google.com/presentation/d/1Z1pukaF-HrZHEwSfr3SV8N2Slo2rMEJxpgl1qJv-QL4/export/png?id=1Z1pukaF-HrZHEwSfr3SV8N2Slo2rMEJxpgl1qJv-QL4&pageid=g38bb68a535_0_215)
 
 While `arrange` sorts variables in ascending order, it's also possible to sort in descending (largest to smallest) order. To do this you just use `desc()` with the following syntax:
 
-```{r}
+
+```r
 msleep %>%
   filter(order == "Primates", sleep_total > 10) %>%
   select(name, sleep_rem, sleep_cycle, sleep_total) %>%
   arrange(desc(sleep_total))
+```
+
+```
+## # A tibble: 5 x 4
+##   name         sleep_rem sleep_cycle sleep_total
+##   <chr>            <dbl>       <dbl>       <dbl>
+## 1 Owl monkey         1.8       NA           17  
+## 2 Slow loris        NA         NA           11  
+## 3 Potto             NA         NA           11  
+## 4 Patas monkey       1.1       NA           10.9
+## 5 Macaque            1.2        0.75        10.1
 ```
 
 By putting `sleep_total` within `desc()`, `arrange()` will now sort your data from the primates with the longest total sleep to the shortest.
@@ -405,22 +655,46 @@ By putting `sleep_total` within `desc()`, `arrange()` will now sort your data fr
 
 `arrange()` can also be used to order non-numeric variables. For example, `arrange()` will sort character vectors alphabetically. 
 
-```{r}
+
+```r
 msleep %>%
   filter(order == "Primates", sleep_total > 10) %>%
   select(name, sleep_rem, sleep_cycle, sleep_total) %>%
   arrange(name)
 ```
 
+```
+## # A tibble: 5 x 4
+##   name         sleep_rem sleep_cycle sleep_total
+##   <chr>            <dbl>       <dbl>       <dbl>
+## 1 Macaque            1.2        0.75        10.1
+## 2 Owl monkey         1.8       NA           17  
+## 3 Patas monkey       1.1       NA           10.9
+## 4 Potto             NA         NA           11  
+## 5 Slow loris        NA         NA           11
+```
+
 ![Data arranged alphabetically by name](https://docs.google.com/presentation/d/1Z1pukaF-HrZHEwSfr3SV8N2Slo2rMEJxpgl1qJv-QL4/export/png?id=1Z1pukaF-HrZHEwSfr3SV8N2Slo2rMEJxpgl1qJv-QL4&pageid=g38bb68a535_0_234)
 
 If you would like to reorder rows based on information in multiple columns, you can specify them separated by commas. This is useful if you have repeated labels in one column and want to sort within a category based on information in another column. In the example here, if there were repeated primates, this would sort the repeats based on their total sleep.
 
-```{r}
+
+```r
 msleep %>%
   filter(order == "Primates", sleep_total > 10) %>%
   select(name, sleep_rem, sleep_cycle, sleep_total) %>%
   arrange(name, sleep_total)
+```
+
+```
+## # A tibble: 5 x 4
+##   name         sleep_rem sleep_cycle sleep_total
+##   <chr>            <dbl>       <dbl>       <dbl>
+## 1 Macaque            1.2        0.75        10.1
+## 2 Owl monkey         1.8       NA           17  
+## 3 Patas monkey       1.1       NA           10.9
+## 4 Potto             NA         NA           11  
+## 5 Slow loris        NA         NA           11
 ```
 
 ### Creating new columns
@@ -429,12 +703,24 @@ You will often find when working with data that you need an additional column. F
 
 Returning to our `msleep` dataset, after filtering and re-ordering, we can create a new column with `mutate()`. Within `mutate()`, we will calculate the number of minutes each mammal sleeps by multiplying the number of hours each animal sleeps by 60 minutes.
 
-```{r}
+
+```r
 msleep %>%
   filter(order == "Primates", sleep_total > 10) %>%
   select(name, sleep_rem, sleep_cycle, sleep_total) %>%
   arrange(name) %>%
   mutate(sleep_total_min = sleep_total * 60)
+```
+
+```
+## # A tibble: 5 x 5
+##   name         sleep_rem sleep_cycle sleep_total sleep_total_min
+##   <chr>            <dbl>       <dbl>       <dbl>           <dbl>
+## 1 Macaque            1.2        0.75        10.1             606
+## 2 Owl monkey         1.8       NA           17              1020
+## 3 Patas monkey       1.1       NA           10.9             654
+## 4 Potto             NA         NA           11               660
+## 5 Slow loris        NA         NA           11               660
 ```
 
 
@@ -446,12 +732,30 @@ Sometimes multiple pieces of information are merged within a single column even 
 
 To read this file into R, we'll use the `readr` package.
 
-```{r message = FALSE}
+
+```r
 ## download file 
 conservation <- read_csv("https://raw.githubusercontent.com/suzanbaert/Dplyr_Tutorials/master/conservation_explanation.csv")
 
 ## take a look at this file
 conservation
+```
+
+```
+## # A tibble: 11 x 1
+##    `conservation abbreviation`                  
+##    <chr>                                        
+##  1 EX = Extinct                                 
+##  2 EW = Extinct in the wild                     
+##  3 CR = Critically Endangered                   
+##  4 EN = Endangered                              
+##  5 VU = Vulnerable                              
+##  6 NT = Near Threatened                         
+##  7 LC = Least Concern                           
+##  8 DD = Data deficient                          
+##  9 NE = Not evaluated                           
+## 10 PE = Probably extinct (informal)             
+## 11 PEW = Probably extinct in the wild (informal)
 ```
 
 ![Conservation data set](https://docs.google.com/presentation/d/1Z1pukaF-HrZHEwSfr3SV8N2Slo2rMEJxpgl1qJv-QL4/export/png?id=1Z1pukaF-HrZHEwSfr3SV8N2Slo2rMEJxpgl1qJv-QL4&pageid=g38bb68a535_0_250)
@@ -460,10 +764,28 @@ In this dataset, we see that there is a single column that includes *both* the a
 
 The `separate()` function requires the name of the existing column that you want to separate (`conservation abbreviation`), the desired column names of the resulting separated columns (`into = c("abbreviation", "description")`), and the characters that currently separate the pieces of information (`sep = " = "`). We have to put `conservation abbreviation` in back ticks in the code below because the column name contains a space. Without the back ticks, R would think that `conservation` and `abbreviation` were two separate things. This is another violation of tidy data! Variable names should have underscores, not spaces!
 
-```{r}
+
+```r
 conservation %>%
   separate(`conservation abbreviation`, 
            into = c("abbreviation", "description"), sep = " = ")
+```
+
+```
+## # A tibble: 11 x 2
+##    abbreviation description                            
+##    <chr>        <chr>                                  
+##  1 EX           Extinct                                
+##  2 EW           Extinct in the wild                    
+##  3 CR           Critically Endangered                  
+##  4 EN           Endangered                             
+##  5 VU           Vulnerable                             
+##  6 NT           Near Threatened                        
+##  7 LC           Least Concern                          
+##  8 DD           Data deficient                         
+##  9 NE           Not evaluated                          
+## 10 PE           Probably extinct (informal)            
+## 11 PEW          Probably extinct in the wild (informal)
 ```
 
 The output of this code shows that we now have two separate columns with the information in the original column separated out into `abbreviation` and `description`.
@@ -474,11 +796,29 @@ The output of this code shows that we now have two separate columns with the inf
 
 The opposite of `separate()` is `unite()`. So, if you have information in two or more different columns but wish it were in one single column, you'll want to use `unite()`. Using the code forming the two separate columns above, we can then add on an extra line of `unite()` code to re-join these separate columns, returning what we started with.
 
-```{r}
+
+```r
 conservation %>%
   separate(`conservation abbreviation`, 
            into = c("abbreviation", "description"), sep = " = ") %>%
   unite(united_col, abbreviation, description, sep = " = ")
+```
+
+```
+## # A tibble: 11 x 1
+##    united_col                                   
+##    <chr>                                        
+##  1 EX = Extinct                                 
+##  2 EW = Extinct in the wild                     
+##  3 CR = Critically Endangered                   
+##  4 EN = Endangered                              
+##  5 VU = Vulnerable                              
+##  6 NT = Near Threatened                         
+##  7 LC = Least Concern                           
+##  8 DD = Data deficient                          
+##  9 NE = Not evaluated                           
+## 10 PE = Probably extinct (informal)             
+## 11 PEW = Probably extinct in the wild (informal)
 ```
 
 ![Output of unite()](https://docs.google.com/presentation/d/1Z1pukaF-HrZHEwSfr3SV8N2Slo2rMEJxpgl1qJv-QL4/export/png?id=1Z1pukaF-HrZHEwSfr3SV8N2Slo2rMEJxpgl1qJv-QL4&pageid=g38bb68a535_0_408)
@@ -487,9 +827,27 @@ conservation %>%
 
 While maybe not quite as important as some of the other functions mentioned in this lesson, a function that will likely prove very helpful as you start analyzing lots of different datasets is `clean_names()` from the `janitor` package. This function takes the existing column names of your dataset, converts them all to lowercase letters and numbers, and separates all words using the underscore character. For example, there is a space in the column name for conservation. `clean_names()` will convert `conservation abbreviation` to `conservation_abbreviation`. These cleaned up column names are a lot easier to work with when you have large datasets.
 
-```{r}
+
+```r
 conservation %>%
   clean_names()
+```
+
+```
+## # A tibble: 11 x 1
+##    conservation_abbreviation                    
+##    <chr>                                        
+##  1 EX = Extinct                                 
+##  2 EW = Extinct in the wild                     
+##  3 CR = Critically Endangered                   
+##  4 EN = Endangered                              
+##  5 VU = Vulnerable                              
+##  6 NT = Near Threatened                         
+##  7 LC = Least Concern                           
+##  8 DD = Data deficient                          
+##  9 NE = Not evaluated                           
+## 10 PE = Probably extinct (informal)             
+## 11 PEW = Probably extinct in the wild (informal)
 ```
 
 ![clean_names() output](https://docs.google.com/presentation/d/1Z1pukaF-HrZHEwSfr3SV8N2Slo2rMEJxpgl1qJv-QL4/export/png?id=1Z1pukaF-HrZHEwSfr3SV8N2Slo2rMEJxpgl1qJv-QL4&pageid=g38bb68a535_0_329)
@@ -504,7 +862,8 @@ To handle the fact that in one dataset the abbreviations are lowercase and the o
  
 We'll then use `left_join()` which takes all of the rows in the first dataset mentioned (`msleep`, below) and incorporates information from the second dataset mentioned (`conserve`, below), when information in the second dataset is available. The `by = ` argument states what columns to join by in the first ("conservation") and second ("abbreviation") datasets. This join adds the `description` column from the `conserve` dataset onto the original dataset (`msleep`). Note that if there is no information in the second dataset that matches with the information in the first dataset, `left_join()` will add NA. Specifically, for rows where conservation is "DOMESTICATED" below, the `description` column will have NA because "DOMESTICATED"" is not an abbreviation in the `conserve` dataset.
 
-```{r eval = FALSE}
+
+```r
 ## take conservation dataset and separate information
 ## into two columns
 ## call that new object `conserve`
@@ -532,7 +891,8 @@ Often, data scientists will want to summarize information in their dataset. You 
 
 There is an incredibly helpful function within `dplyr` called `group_by()`. `group_by()` groups a dataset by one or more variables. On its own, it does not appear to change the dataset very much. The difference between the two outputs below is subtle:
 
-```{r eval = FALSE}
+
+```r
 msleep
 
 msleep %>%
@@ -552,10 +912,18 @@ Throughout data cleaning and analysis it will be important to summarize informat
 
 Continuing on from the previous examples, if you wanted to figure out how many samples are present in your dataset, you could use the `summarize()` function. 
 
-```{r}
+
+```r
 msleep %>%
   select(order) %>%
   summarize(N=n())
+```
+
+```
+## # A tibble: 1 x 1
+##       N
+##   <int>
+## 1    83
 ```
 
 This provides a summary of the data with the new column name we specified above (`N`) and the number of samples in the dataset. Note that we could also obtain the same information by directly obtaining the number of rows in the data frame with `nrow(msleep)`.
@@ -564,11 +932,37 @@ This provides a summary of the data with the new column name we specified above 
 
 However, if you wanted to count how many of each different `order` of mammal you had. You would first `group_by(order)` and then use `summarize()`. This will summarize within group.
 
-```{r}
+
+```r
 msleep %>%
   group_by(order) %>% 
   select(order) %>%
   summarize(N=n())
+```
+
+```
+## # A tibble: 19 x 2
+##    order               N
+##    <chr>           <int>
+##  1 Afrosoricida        1
+##  2 Artiodactyla        6
+##  3 Carnivora          12
+##  4 Cetacea             3
+##  5 Chiroptera          2
+##  6 Cingulata           2
+##  7 Didelphimorphia     2
+##  8 Diprotodontia       2
+##  9 Erinaceomorpha      2
+## 10 Hyracoidea          3
+## 11 Lagomorpha          1
+## 12 Monotremata         1
+## 13 Perissodactyla      3
+## 14 Pilosa              1
+## 15 Primates           12
+## 16 Proboscidea         2
+## 17 Rodentia           22
+## 18 Scandentia          1
+## 19 Soricomorpha        5
 ```
 
 The output from this, like above, includes the column name we specified in summarize (`N`). However, it includes the number of samples in the group_by variable we specified (`order`).
@@ -579,11 +973,37 @@ There are other ways in which the data can be summarized using `summarize()`. In
 
 For example, if we wanted to calculate the average (mean) total sleep each order of mammal got, we could use the following syntax:
 
-```{r}
+
+```r
 msleep %>%
   group_by(order) %>% 
   select(order, sleep_total) %>%
   summarize(N=n(), mean_sleep=mean(sleep_total))
+```
+
+```
+## # A tibble: 19 x 3
+##    order               N mean_sleep
+##    <chr>           <int>      <dbl>
+##  1 Afrosoricida        1      15.6 
+##  2 Artiodactyla        6       4.52
+##  3 Carnivora          12      10.1 
+##  4 Cetacea             3       4.5 
+##  5 Chiroptera          2      19.8 
+##  6 Cingulata           2      17.8 
+##  7 Didelphimorphia     2      18.7 
+##  8 Diprotodontia       2      12.4 
+##  9 Erinaceomorpha      2      10.2 
+## 10 Hyracoidea          3       5.67
+## 11 Lagomorpha          1       8.4 
+## 12 Monotremata         1       8.6 
+## 13 Perissodactyla      3       3.47
+## 14 Pilosa              1      14.4 
+## 15 Primates           12      10.5 
+## 16 Proboscidea         2       3.6 
+## 17 Rodentia           22      12.5 
+## 18 Scandentia          1       8.9 
+## 19 Soricomorpha        5      11.1
 ```
 
 ![summarize using mean()](https://docs.google.com/presentation/d/1Z1pukaF-HrZHEwSfr3SV8N2Slo2rMEJxpgl1qJv-QL4/export/png?id=1Z1pukaF-HrZHEwSfr3SV8N2Slo2rMEJxpgl1qJv-QL4&pageid=g38bb68a535_0_300)
@@ -594,17 +1014,47 @@ In addition to using `summarize()` from `dplyr`, the `tabyl()` function from the
 
 Again returning to our `msleep` dataset, if we wanted to get a summary of how many samples are in each order category and what percent of the data fall into each category we could call tabyl on that variable. For example, if we use the following syntax, we easily get a quick snapshot of this variable. 
 
-```{r}
+
+```r
 msleep %>%
   tabyl(order)
+```
+
+```
+##            order  n    percent
+##     Afrosoricida  1 0.01204819
+##     Artiodactyla  6 0.07228916
+##        Carnivora 12 0.14457831
+##          Cetacea  3 0.03614458
+##       Chiroptera  2 0.02409639
+##        Cingulata  2 0.02409639
+##  Didelphimorphia  2 0.02409639
+##    Diprotodontia  2 0.02409639
+##   Erinaceomorpha  2 0.02409639
+##       Hyracoidea  3 0.03614458
+##       Lagomorpha  1 0.01204819
+##      Monotremata  1 0.01204819
+##   Perissodactyla  3 0.03614458
+##           Pilosa  1 0.01204819
+##         Primates 12 0.14457831
+##      Proboscidea  2 0.02409639
+##         Rodentia 22 0.26506024
+##       Scandentia  1 0.01204819
+##     Soricomorpha  5 0.06024096
 ```
 
 ![summarize using tabyl() from janitor](https://docs.google.com/presentation/d/1Z1pukaF-HrZHEwSfr3SV8N2Slo2rMEJxpgl1qJv-QL4/export/png?id=1Z1pukaF-HrZHEwSfr3SV8N2Slo2rMEJxpgl1qJv-QL4&pageid=g38bb68a535_0_304)
 
 Note, that `tabyl` assumes categorical variables. If you want to summarize numeric variables `summary()` works well. For example, this code will summarize the values in `msleep$awake` for you. 
 
-```{r}
+
+```r
 summary(msleep$awake)
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    4.10   10.25   13.90   13.57   16.15   22.10
 ```
 
 ![summarize numeric variables](https://docs.google.com/presentation/d/1Z1pukaF-HrZHEwSfr3SV8N2Slo2rMEJxpgl1qJv-QL4/export/png?id=1Z1pukaF-HrZHEwSfr3SV8N2Slo2rMEJxpgl1qJv-QL4&pageid=g38bb68a535_0_320)
@@ -616,10 +1066,29 @@ Another common issue in data wrangling is the presence of duplicate entries. Som
 For example, in the `msleep` dataset, if you expected to only have one mammal representing each `genus` and `vore` you could double check this hung using `get_dupes()`
 
 
-```{r}
+
+```r
 # identify observations that match in both genus and vore
 msleep %>% 
   get_dupes(genus, vore)
+```
+
+```
+## # A tibble: 10 x 12
+##    genus vore  dupe_count name  order conservation sleep_total sleep_rem
+##    <chr> <chr>      <int> <chr> <chr> <chr>              <dbl>     <dbl>
+##  1 Equus herbi          2 Horse Peri… domesticated         2.9       0.6
+##  2 Equus herbi          2 Donk… Peri… domesticated         3.1       0.4
+##  3 Pant… carni          3 Tiger Carn… en                  15.8      NA  
+##  4 Pant… carni          3 Jagu… Carn… nt                  10.4      NA  
+##  5 Pant… carni          3 Lion  Carn… vu                  13.5      NA  
+##  6 Sper… herbi          3 Arct… Rode… lc                  16.6      NA  
+##  7 Sper… herbi          3 Thir… Rode… lc                  13.8       3.4
+##  8 Sper… herbi          3 Gold… Rode… lc                  15.9       3  
+##  9 Vulp… carni          2 Arct… Carn… <NA>                12.5      NA  
+## 10 Vulp… carni          2 Red … Carn… <NA>                 9.8       2.4
+## # … with 4 more variables: sleep_cycle <dbl>, awake <dbl>, brainwt <dbl>,
+## #   bodywt <dbl>
 ```
 
 The output demonstrates there are 10 mammals that overlap in their genus and vore. Note that the third column of the output counts *how many* duplicate observations there are. This can be very helpful when you're checking your data!
@@ -630,26 +1099,105 @@ The output demonstrates there are 10 mammals that overlap in their genus and vor
 
 When you would rather get a snapshot of the entire dataset, rather than just one variable, the `skim()` function from the `skimr` package can be very helpful. The output from `skim()` breaks the data up by variable type. For example, the `msleep` data set is broken up into `character` and `numeric` variable types. The data are then summarized in a meaningful way for each. This function provides a lot of information about the entire data set. So, when you want a summarize a dataset and quickly get a sense of your data, `skim()` is a great option!
 
-```{r}
+
+```r
 # summarize dataset
 skim(msleep)
+```
+
+```
+## Skim summary statistics
+##  n obs: 83 
+##  n variables: 11 
+## 
+## ── Variable type:character ────────────────────────────────────────────────
+##      variable missing complete  n min max empty n_unique
+##  conservation      29       54 83   2  12     0        6
+##         genus       0       83 83   3  13     0       77
+##          name       0       83 83   3  30     0       83
+##         order       0       83 83   6  15     0       19
+##          vore       7       76 83   4   7     0        4
+## 
+## ── Variable type:numeric ──────────────────────────────────────────────────
+##     variable missing complete  n   mean     sd      p0     p25    p50
+##        awake       0       83 83  13.57   4.45 4.1     10.25   13.9  
+##       bodywt       0       83 83 166.14 786.84 0.005    0.17    1.67 
+##      brainwt      27       56 83   0.28   0.98 0.00014  0.0029  0.012
+##  sleep_cycle      51       32 83   0.44   0.36 0.12     0.18    0.33 
+##    sleep_rem      22       61 83   1.88   1.3  0.1      0.9     1.5  
+##  sleep_total       0       83 83  10.43   4.45 1.9      7.85   10.1  
+##    p75    p100     hist
+##  16.15   22.1  ▂▃▅▆▇▃▃▃
+##  41.75 6654    ▇▁▁▁▁▁▁▁
+##   0.13    5.71 ▇▁▁▁▁▁▁▁
+##   0.58    1.5  ▇▃▁▂▁▁▁▁
+##   2.4     6.6  ▇▇▇▃▂▁▁▁
+##  13.75   19.9  ▃▃▂▇▅▅▂▂
 ```
 
 ![summarize entire dataset using skim() from skimr](https://docs.google.com/presentation/d/1Z1pukaF-HrZHEwSfr3SV8N2Slo2rMEJxpgl1qJv-QL4/export/png?id=1Z1pukaF-HrZHEwSfr3SV8N2Slo2rMEJxpgl1qJv-QL4&pageid=g38bb68a535_0_313)
 
 Note that this function allows for you to specify which columns you'd like to summarize, if you're not interested in seeing a summary of the entire dataset:
 
-```{r}
+
+```r
 # see summary for specified columns
 skim(msleep, genus, vore, sleep_total)
 ```
 
+```
+## Skim summary statistics
+##  n obs: 83 
+##  n variables: 11 
+## 
+## ── Variable type:character ────────────────────────────────────────────────
+##  variable missing complete  n min max empty n_unique
+##     genus       0       83 83   3  13     0       77
+##      vore       7       76 83   4   7     0        4
+## 
+## ── Variable type:numeric ──────────────────────────────────────────────────
+##     variable missing complete  n  mean   sd  p0  p25  p50   p75 p100
+##  sleep_total       0       83 83 10.43 4.45 1.9 7.85 10.1 13.75 19.9
+##      hist
+##  ▃▃▂▇▅▅▂▂
+```
+
 It is also possible to group data (using `dplyr`'s `group_by()` before summarizing. Notice in the summary output that each variable specified (`genus` and `sleep_total`) are now broken down within each of the `vore` categories.
 
-```{r}
+
+```r
 msleep %>% 
   group_by(vore) %>% 
   skim(genus, sleep_total)
+```
+
+```
+## Skim summary statistics
+##  n obs: 83 
+##  n variables: 11 
+##  group variables: vore 
+## 
+## ── Variable type:character ────────────────────────────────────────────────
+##     vore variable missing complete  n min max empty n_unique
+##    carni    genus       0       19 19   5  13     0       16
+##    herbi    genus       0       32 32   3  12     0       29
+##  insecti    genus       0        5  5   6  12     0        5
+##     omni    genus       0       20 20   3  13     0       20
+##     <NA>    genus       0        7  7   6  11     0        7
+## 
+## ── Variable type:numeric ──────────────────────────────────────────────────
+##     vore    variable missing complete  n  mean   sd  p0  p25  p50   p75
+##    carni sleep_total       0       19 19 10.38 4.67 2.7 6.25 10.4 13   
+##    herbi sleep_total       0       32 32  9.51 4.88 1.9 4.3  10.3 14.22
+##  insecti sleep_total       0        5  5 14.94 5.92 8.4 8.6  18.1 19.7 
+##     omni sleep_total       0       20 20 10.93 2.95 8   9.1   9.9 10.93
+##     <NA> sleep_total       0        7  7 10.19 3    5.4 8.65 10.6 12.15
+##  p100     hist
+##  19.4 ▃▇▂▇▆▃▂▃
+##  16.6 ▆▇▁▂▂▆▇▅
+##  19.9 ▇▁▁▁▁▁▃▇
+##  18   ▆▇▂▁▁▁▁▂
+##  13.7 ▃▃▁▁▃▇▁▇
 ```
 
 
@@ -657,9 +1205,22 @@ msleep %>%
 
 While base R has a summary function, the `skimr` package also has a helpful `summary()` function that provides you with a quick summary of the dataset at large.
 
-```{r}
+
+```r
 skim(msleep) %>% 
   summary()
+```
+
+```
+## A skim object    
+## 
+## Name: msleep   
+## Number of Rows: 83   
+## Number of Columns: 11    
+##     
+## Column type frequency    
+## character: 5   
+## numeric: 6
 ```
 
 ## Working With Factors
@@ -676,7 +1237,8 @@ In R, factors are comprised of two components: the actual **values** of the data
 
 For example, if we were to create a character vector of the twelve months, we could certainly do that:
 
-```{r}
+
+```r
 ## all 12 months
 all_months <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
@@ -686,9 +1248,14 @@ some_months <- c("Mar", "Dec", "Jan",  "Apr", "Jul")
 
 However, if we were to sort this vector, R would sort this vector alphabetically. 
 
-```{r}
+
+```r
 # alphabetical sort
 sort(some_months)
+```
+
+```
+## [1] "Apr" "Dec" "Jan" "Jul" "Mar"
 ```
 
 
@@ -696,15 +1263,28 @@ sort(some_months)
 
 While you and I know that this is not how months should be ordered, we haven't yet told R that. To do so, we need to let R know that it's a factor variable and what the levels of that factor variable should be.
 
-```{r}
+
+```r
 # create factor
 mon <- factor(some_months, levels = all_months)
 
 # look at factor
 mon
+```
 
+```
+## [1] Mar Dec Jan Apr Jul
+## Levels: Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec
+```
+
+```r
 # look at sorted factor
 sort(mon)
+```
+
+```
+## [1] Jan Mar Apr Jul Dec
+## Levels: Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec
 ```
 
 ![defining the factor levels sorts this variable sensibly](https://docs.google.com/presentation/d/16Y8swNgNfpmZPqDfw-lO36MXRc2T66zWoFB5Y35rmJU/export/png?id=16Y8swNgNfpmZPqDfw-lO36MXRc2T66zWoFB5Y35rmJU&pageid=g391e563ea4_0_16)
@@ -715,14 +1295,27 @@ Here, we specify all the possible values that the factor could take in the `leve
 
 What if you wanted your months to start with July first? That can be accomplished using `fct_relevel()`. To use this function, you simply need to state what you'd like to relevel (`mon`) followed by the levels you want to relevel. If you want these to be placed in the beginning, the after argument should be `after = 0`. You can play around with this setting to see how changing `after` affects the levels in your output.
 
-```{r}
+
+```r
 mon_relevel <- fct_relevel(mon, "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", after = 0)
 
 # releveled
 mon_relevel
+```
 
+```
+## [1] Mar Dec Jan Apr Jul
+## Levels: Jul Aug Sep Oct Nov Dec Jan Feb Mar Apr May Jun
+```
+
+```r
 # releleveld and sorted
 sort(mon_relevel)
+```
+
+```
+## [1] Jul Dec Jan Mar Apr
+## Levels: Jul Aug Sep Oct Nov Dec Jan Feb Mar Apr May Jun
 ```
 
 
@@ -734,15 +1327,28 @@ After re-leveling, when we sort this factor, we see that Jul is placed first, as
 
 Now, if you're not interested in the months being in calendar year order, you can always state that you want the levels to stay in the same order as the data you started with, you simply specify `fct_inorder`.   
 
-```{r}
+
+```r
 # keep order of appearance
 mon_inorder <- fct_inorder(some_months)
 
 # output
 mon_inorder
+```
 
+```
+## [1] Mar Dec Jan Apr Jul
+## Levels: Mar Dec Jan Apr Jul
+```
+
+```r
 # sorted 
 sort(mon_inorder)
+```
+
+```
+## [1] Mar Dec Jan Apr Jul
+## Levels: Mar Dec Jan Apr Jul
 ```
 
 
@@ -760,13 +1366,31 @@ For the remainder of this lesson, we're going to return to using a dataset that'
 
 To re-order factor levels by frequency of the value in the dataset, you'll want to use `fct_infreq()`. Below, we see from the output from `tabyl()` that 'soybean' is the most frequent feed in the data set while 'horsebean' is the least frequent. Thus, when we order by frequency, we can expect these two feeds to be at opposite ends for our levels.
 
-```{r}
+
+```r
 ## take a look at frequency of each level 
 ## using tabyl() from `janitor` package
 tabyl(chickwts$feed)
+```
 
+```
+##  chickwts$feed  n   percent
+##         casein 12 0.1690141
+##      horsebean 10 0.1408451
+##        linseed 12 0.1690141
+##       meatmeal 11 0.1549296
+##        soybean 14 0.1971831
+##      sunflower 12 0.1690141
+```
+
+```r
 ## order levels by frequency 
 fct_infreq(chickwts$feed) %>% head()
+```
+
+```
+## [1] horsebean horsebean horsebean horsebean horsebean horsebean
+## Levels: soybean casein linseed sunflower meatmeal horsebean
 ```
 
 ![fct_infreq orders levels based on frequency in dataset](https://docs.google.com/presentation/d/16Y8swNgNfpmZPqDfw-lO36MXRc2T66zWoFB5Y35rmJU/export/png?id=16Y8swNgNfpmZPqDfw-lO36MXRc2T66zWoFB5Y35rmJU&pageid=g391e563ea4_0_56)
@@ -777,9 +1401,15 @@ As expected, soybean, the most frequent level, appears as the first level and ho
 
 If we wanted to sort the levels from least frequent to most frequent, we could just put `fct_rev()` around the code we just used to reverse the factor level order.
 
-```{r}
+
+```r
 ## reverse factor level order
 fct_rev(fct_infreq(chickwts$feed)) %>% head()
+```
+
+```
+## [1] horsebean horsebean horsebean horsebean horsebean horsebean
+## Levels: horsebean meatmeal sunflower linseed casein soybean
 ```
 
 ![fct_rev() reverses the factor level order](https://docs.google.com/presentation/d/16Y8swNgNfpmZPqDfw-lO36MXRc2T66zWoFB5Y35rmJU/export/png?id=16Y8swNgNfpmZPqDfw-lO36MXRc2T66zWoFB5Y35rmJU&pageid=g391e563ea4_0_20)
@@ -788,7 +1418,8 @@ fct_rev(fct_infreq(chickwts$feed)) %>% head()
 
 At times you may want to reorder levels of a factor by another variable in your dataset. This is often helpful when generating plots (which we'll get to in a future lesson!). To do this you specify the variable you want to reorder, followed by the numeric variable by which you'd like the factor to be re-leveled. Here, we see that we're re-leveling feed by the weight of the chickens.  While we haven't discussed plotting yet, the best way to demonstrate how this works is by plotting the feed against the weights. We can see that the order of the factor is such that those chickens with the lowest median weight (horsebean) are to the left, while those with the highest median weight (casein) are to the right.
 
-```{r}
+
+```r
 ## order levels by a second numeric variable 
 chickwts %>%
   mutate(newfeed = fct_reorder(feed, weight)) %>% 
@@ -796,13 +1427,16 @@ chickwts %>%
   geom_point()
 ```
 
+![](03-tidying_files/figure-epub3/unnamed-chunk-47-1.png)<!-- -->
+
 ![fct_reorder allows you to re-level a factor based on a secondary numeric variable](https://docs.google.com/presentation/d/16Y8swNgNfpmZPqDfw-lO36MXRc2T66zWoFB5Y35rmJU/export/png?id=16Y8swNgNfpmZPqDfw-lO36MXRc2T66zWoFB5Y35rmJU&pageid=g391e563ea4_0_69)
 
 ### Combining several levels into one: `fct_recode()`
 
 To demonstrate how to combine several factor levels into a single level, we'll continue to use our 'chickwts' dataset. Now, I don't know much about chicken feed, and there's a good chance you know a lot more. However, let's *assume* (even if it doesn't make good sense with regards to chicken feed) you wanted to combine all the feeds with the name "bean" in it to a single category and you wanted to combine "linseed" and "sunflower"" into the category "seed". This can be simply accomplished with `fct_recode`. In fact, below, you see we can rename all the levels to a simpler term (the values on the left side of the equals sign) by re-naming the original level names (the right side of the equals sign). This code will create a new column, called `feed_recode` (accomplished with `mutate()`). This new column will combine "horsebean" and "soybean feeds", grouping them both into the larger level "bean". It will similarly group "sunflower" and "linseed" into the larger level "seed." All other feed types will also be renamed. When we look at the summary of this new column by using `tabyl()`, we see that all of the feeds have been recoded, just as we specified! We now have four different feed types, rather than the original six.
 
-```{r}
+
+```r
 ## we can use mutate to create a new column
 ## and fct_recode() to:
 ## 1. group horsebean and soybean into a single level
@@ -819,18 +1453,33 @@ chickwts %>%
   tabyl(feed_recode)
 ```
 
+```
+##  feed_recode  n   percent
+##       casein 12 0.1690141
+##         bean 24 0.3380282
+##         seed 24 0.3380282
+##         meal 11 0.1549296
+```
+
 ![fct_recode() can be used to group multiple levels into a single level and/or to rename levels](https://docs.google.com/presentation/d/16Y8swNgNfpmZPqDfw-lO36MXRc2T66zWoFB5Y35rmJU/export/png?id=16Y8swNgNfpmZPqDfw-lO36MXRc2T66zWoFB5Y35rmJU&pageid=g391e563ea4_0_79)
 
 ### Converting numeric levels to factors: `ifelse()` + `factor()`
 
 Finally, when working with factors, there are times when you want to convert a numeric variable into a factor. For example, if you were talking about a dataset with BMI for a number of individuals, you may want to categorize people based on whether or not they are underweight (BMI < 18.5), of a healthy weight (BMI between 18.5 and 29.9), or obese (BMI >= 30). When you want to take a numeric variable and turn it into a categorical factor variable, you can accomplish this easily by using `ifelse()` statements. `if{}` statements and `else{}` statements were covered in an earlier lesson. Here we combine those two ideas. Within a single statement we provide R with a condition: `weight <= 200`. With this, we are stating that the condition is if a chicken's weight is less than or equal to 200 grams. Then, if that condition is true, meaning if a chicken's weight is less than or equal to 200 grams, let's assign that chicken to the category `low`. Otherwise, and this is the `else{}` part of the `ifelse()` function, assign that chicken to the category `high`. Finally, we have to let R know that weight_recode is a factor variable, so we call factor() on this new column. This way we take a numeric variable (`weight`), and turn it into a factor variable (`weight_recode`). 
 
-```{r}
+
+```r
 ## convert numeric variable to factor
 chickwts %>%
     mutate(weight_recode = ifelse(weight <= 200, "low", "high"), 
            weight_recode = factor(weight_recode)) %>%
     tabyl(weight_recode)
+```
+
+```
+##  weight_recode  n   percent
+##           high 54 0.7605634
+##            low 17 0.2394366
 ```
 
 ![converting a numeric type variable to a factor](https://docs.google.com/presentation/d/16Y8swNgNfpmZPqDfw-lO36MXRc2T66zWoFB5Y35rmJU/export/png?id=16Y8swNgNfpmZPqDfw-lO36MXRc2T66zWoFB5Y35rmJU&pageid=g391e563ea4_0_84)
@@ -841,7 +1490,8 @@ In lessons an earlier course, you were introduced to different types of objects 
 
 As with strings and factors, there is a tidyverse package to help you work with dates more easily. The `lubridate` package is not part of the core tidyverse packages, so it will have to be loaded individually. This package will make working with dates and times easier. Before working through this lesson, you'll want to be sure that `lubridate` has been installed and loaded in:
 
-```{r message = FALSE}
+
+```r
 #install.packages('lubridate')
 library(lubridate)
 ```
@@ -858,30 +1508,53 @@ To get objects into dates and date-times that can be more easily worked with in 
 
 Date information is often provided as a string. The functions within the `lubridate` package can effectively handle this information. To use them to generate date objects, you can call a function using `y`, `m`, and `d` in the order in which the year (`y`), month (`m`), and date (`d`) appear in your data. The code below produces identical output for the date September 29th, 1988, despite the three distinct input formats. This uniform output makes working with dates much easier in R.
 
-```{r}
+
+```r
 # year-month-date
 ymd("1988-09-29")
+```
 
+```
+## [1] "1988-09-29"
+```
+
+```r
 #month-day-year
 mdy("September 29th, 1988")
+```
 
+```
+## [1] "1988-09-29"
+```
+
+```r
 #day-month-year
 dmy("29-Sep-1988")
+```
+
+```
+## [1] "1988-09-29"
 ```
 
 ![creating date and date-time objects](https://docs.google.com/presentation/d/1iLU-H6-GZw7EhL2syFZnjn_tC_cI6s9PmKRxcSOjg1c/export/png?id=1iLU-H6-GZw7EhL2syFZnjn_tC_cI6s9PmKRxcSOjg1c&pageid=g39252087a2_0_22)
 
 However, this has only covered working with date objects. To work with date-time objects, you have to further include hour (`h`), minute(`m`), and second (`s`) into the function. For example, in the code below, you can see that the output contains time information in addition to the date information generated in the functions above:
 
-```{r}
+
+```r
 ymd_hms("1988-09-29 20:11:59")
+```
+
+```
+## [1] "1988-09-29 20:11:59 UTC"
 ```
 
 #### From individual parts
 
 If you have a data set where month, date, year, and/or time information are included in separate columns, the functions within `lubridate` can take this separate information and create a date or date-time object. To work through examples using the functions `make_date()` and `make_timedate()`, we'll use a dataset called `nycflights13`. As this dataset is *not* included with the R by default, you'll have to install and load it in directly:
 
-```{r message = FALSE}
+
+```r
 #install.packages('nycflights13')
 library(nycflights13)
 ```
@@ -890,7 +1563,8 @@ Loading this package makes a data frame called `flights`, which includes "on-tim
 
 First, to create a new column, as we've done throughout the lessons in this course, we will use `mutate()`. To create a `date` object, we'll use the function `make_date()`. We just then need to supply the names of the columns containing the year, month, and day information to this function. 
 
-```{r}
+
+```r
 ## make_date() creates a date object 
 ## from information in separate columns
 flights %>% 
@@ -898,16 +1572,51 @@ flights %>%
   mutate(departure = make_date(year, month, day))
 ```
 
+```
+## # A tibble: 336,776 x 4
+##     year month   day departure 
+##    <int> <int> <int> <date>    
+##  1  2013     1     1 2013-01-01
+##  2  2013     1     1 2013-01-01
+##  3  2013     1     1 2013-01-01
+##  4  2013     1     1 2013-01-01
+##  5  2013     1     1 2013-01-01
+##  6  2013     1     1 2013-01-01
+##  7  2013     1     1 2013-01-01
+##  8  2013     1     1 2013-01-01
+##  9  2013     1     1 2013-01-01
+## 10  2013     1     1 2013-01-01
+## # … with 336,766 more rows
+```
+
 ![mutate and make_date() create a new column -- departure -- with a date object](https://docs.google.com/presentation/d/1iLU-H6-GZw7EhL2syFZnjn_tC_cI6s9PmKRxcSOjg1c/export/png?id=1iLU-H6-GZw7EhL2syFZnjn_tC_cI6s9PmKRxcSOjg1c&pageid=g39252087a2_0_0)
 
 A similar procedure is used to create a date-time object; however, this requires the function `make_datetime()` and requires columns with information about time be specified. Below, `hour` and `minute` are included to the function's input.
 
-```{r}
+
+```r
 ## make_datetime() creates a date-time object 
 ## from information in separate columns
 flights %>% 
   select(year, month, day, hour, minute) %>% 
   mutate(departure = make_datetime(year, month, day, hour, minute))
+```
+
+```
+## # A tibble: 336,776 x 6
+##     year month   day  hour minute departure          
+##    <int> <int> <int> <dbl>  <dbl> <dttm>             
+##  1  2013     1     1     5     15 2013-01-01 05:15:00
+##  2  2013     1     1     5     29 2013-01-01 05:29:00
+##  3  2013     1     1     5     40 2013-01-01 05:40:00
+##  4  2013     1     1     5     45 2013-01-01 05:45:00
+##  5  2013     1     1     6      0 2013-01-01 06:00:00
+##  6  2013     1     1     5     58 2013-01-01 05:58:00
+##  7  2013     1     1     6      0 2013-01-01 06:00:00
+##  8  2013     1     1     6      0 2013-01-01 06:00:00
+##  9  2013     1     1     6      0 2013-01-01 06:00:00
+## 10  2013     1     1     6      0 2013-01-01 06:00:00
+## # … with 336,766 more rows
 ```
 
 ![mutate and make_datetime() create a new column -- departure -- with a date-time object](https://docs.google.com/presentation/d/1iLU-H6-GZw7EhL2syFZnjn_tC_cI6s9PmKRxcSOjg1c/export/png?id=1iLU-H6-GZw7EhL2syFZnjn_tC_cI6s9PmKRxcSOjg1c&pageid=g39252087a2_0_4)
@@ -921,7 +1630,8 @@ The reason we've dedicated an entire lesson to working with dates and have shown
 
 Often you're most interested in grouping your data by year, or just looking at monthly or weekly trends. To accomplish this, you have to be able to extract just a component of your date object. You can do this with the functions: `year()`, `month()`, `mday()`,`wday()`, `hour()`, `minute()` and `second()`. Each will extract the specified piece of information from the date or date-time object. 
 
-```{r eval = FALSE}
+
+```r
 mydate <- ymd("1988-09-29")
 
 ## extract year information
@@ -944,16 +1654,27 @@ wday(mydate, label = TRUE)
 
 In addition to being able to look at trends by month or year, which requires being able to extract that component from a date or date-time object, it's also important to be able to operate over dates.  If I give you a date of birth and ask you how old that person is today, you'll want to be able to calculate that. This is possible when working with date objects. By subtracting this birth date from today's date, you'll learn now many days old this person is. By specifying this object using `as.duration()`, you'll be able to extract how old this person is in years.
 
-```{r}
+
+```r
 ## how old is someone born on Sept 29, 1988
 mydate <- ymd("1988-09-29")
 
 ## subtract birthday from todays date
 age <- today() - mydate
 age
+```
 
+```
+## Time difference of 11316 days
+```
+
+```r
 ## a duration object can get this information in years
 as.duration(age)
+```
+
+```
+## [1] "977702400s (~30.98 years)"
 ```
 
 
@@ -969,13 +1690,15 @@ You're likely familiar with strings generally; however, to review briefly here:
 
 So within R, you could create a string using this syntax. Note that the string begins and ends with quotation marks:
 
-```{r eval = FALSE}
+
+```r
 stringA <- "This sentence is a string."
 ```
 
 Multiple strings can be stored within vectors. So, if you have multiple vectors that you want to store in a single object, you could do so by using c() around the strings you want to store and commas to separate each individual string:
 
-```{r eval = FALSE}
+
+```r
 objectA <- c( "This sentence is a string.", "Short String", "Third string" )
 ```
 
@@ -1002,10 +1725,15 @@ When working with strings, some of the most frequent tasks you'll need to comple
 
 Returning to our object with three strings from earlier in the lesson, we can determine the length of each string in the vector.  
 
-```{r}
+
+```r
 objectA <- c( "This sentence is a string.", "Short String", "Third string" )
 
 str_length(objectA)
+```
+
+```
+## [1] 26 12 12
 ```
 
 
@@ -1017,8 +1745,13 @@ Here we see that the first string has a length of 26. If you were to go back and
 
 If you were interested in combining strings, you'd want to use `str_c`.
 
-```{r}
+
+```r
 str_c( "Good", "Morning")
+```
+
+```
+## [1] "GoodMorning"
 ```
 
 
@@ -1026,18 +1759,28 @@ str_c( "Good", "Morning")
 
 However, the output from this doesn't look quite right. You may want a space between these two words when you combine the two strings. That can be controlled with the `sep` argument.
 
-```{r}
+
+```r
 str_c( "Good", "Morning", sep=" ")
+```
+
+```
+## [1] "Good Morning"
 ```
 
 #### Subsetting strings: `str_sub()`
 
 Often, it's important to get part of a string out. To do this, you'll want to subset the string using the `str_sub()` function. For example, if you wanted only the first three characters in the string below, you would specify that within `str_sub()`.
 
-```{r}
+
+```r
 object <- c( "Good", "Morning")
 
 str_sub(object, 1, 3)
+```
+
+```
+## [1] "Goo" "Mor"
 ```
 
 
@@ -1045,10 +1788,15 @@ str_sub(object, 1, 3)
 
 You can also use negative numbers to count from the end of the string. For example, below we see code that returns the last three positions in the string.
 
-```{r}
+
+```r
 object <- c( "Good", "Morning")
 
 str_sub(object, -3, -1)
+```
+
+```
+## [1] "ood" "ing"
 ```
 
 ![`str_sub()` output counting from end of string](https://docs.google.com/presentation/d/1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw/export/png?id=1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw&pageid=g398837bd56_0_36)
@@ -1057,10 +1805,15 @@ str_sub(object, -3, -1)
 
 Finally, if you wanted to sort a string alphabetically, `str_sort()` can help you accomplish that.
 
-```{r}
+
+```r
 names <- c("Keisha", "Mohammed", "Jane")
 
 str_sort(names)
+```
+
+```
+## [1] "Jane"     "Keisha"   "Mohammed"
 ```
 
 
@@ -1091,12 +1844,15 @@ If interested in finding a pattern at the beginning (`^`) or end (`$`) of a stri
 
 To get comfortable with using regexps with strings, `str_view()` can be very helpful. The output from `str_view()` highlights what portion of your string match the pattern specified in your regexp with a gray box. For example, to we'll start using anchors and `str_view()` below:
 
-```{r}
+
+```r
 names <- c("Keisha", "Mohammed", "Jane", "Mathieu")
 
 ## identify strings that start with "M"
 str_view(names, "^M")
 ```
+
+![](03-tidying_files/figure-epub3/unnamed-chunk-66-1.png)<!-- -->
 
 
 ![`str_view()` identifies names that start with M](https://docs.google.com/presentation/d/1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw/export/png?id=1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw&pageid=g38bb68a539_0_30)
@@ -1105,26 +1861,33 @@ In this first example we see in the Viewer Panel that str_view has identified th
 
 However, if you try to match strings that end with the letter "M", no match is found.
 
-```{r}
+
+```r
 ## identify strings that end with "M"
 str_view(names, "M$")
 ```
+
+![](03-tidying_files/figure-epub3/unnamed-chunk-67-1.png)<!-- -->
 
 
 ![`str_view()` does not identify any names that end with M](https://docs.google.com/presentation/d/1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw/export/png?id=1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw&pageid=g38bb68a539_0_26)
 
 To identify names by that end with the letter "a", you would use the following.
 
-```{r}
+
+```r
 ## identify strings that end with "a"
 str_view(names, "a$")
 ```
+
+![](03-tidying_files/figure-epub3/unnamed-chunk-68-1.png)<!-- -->
 
 ![`str_view()` identifies names that end with a](https://docs.google.com/presentation/d/1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw/export/png?id=1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw&pageid=g38bb68a539_0_34)
 
 Note, however, that regexps are case sensitive. To match patterns, you have to consider that "A" and "a" are different characters.  
 
-```{r eval = FALSE}
+
+```r
 ## identify strings that end with "A"
 str_view(names, "A$")
 ```
@@ -1135,7 +1898,8 @@ str_view(names, "A$")
 
 To count the number of matches within your strings, you would use `str_count()`. Below, using the names vector we've been using, we see that `str_count()` produces a 1 for those names that start with "M" and a 0 otherwise.
 
-```{r eval = FALSE}
+
+```r
 ## identify strings that start with "M"
 ## return count of the number of times string matches pattern
 str_count(names, "^M")
@@ -1146,10 +1910,15 @@ str_count(names, "^M")
 
 However, if we instead wanted a count of the numbers of lowercase "m"s, we could still use `str_count()` to accomplish that. Notice below we've removed the specification to just look at the beginning of the string. Here, we're looking for lowercase m's anywhere in the string and counting them:
 
-```{r}
+
+```r
 ## identify strings that have a lowercase "m"
 ## return count of the number of times string matches pattern
 str_count(names, "m")
+```
+
+```
+## [1] 0 2 0 0
 ```
 
 ![`str_count()` strings that have an m in them](https://docs.google.com/presentation/d/1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw/export/png?id=1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw&pageid=g38bb68a539_0_108)
@@ -1158,10 +1927,15 @@ str_count(names, "m")
 
 Instead of returning a count, at times you're just interested in knowing which strings match the pattern you're searching for. In these cases you'll want to use `str_detect()`. This function simply returns a TRUE if the string matches the pattern specified and FALSE otherwise.
 
-```{r}
+
+```r
 ## identify strings that start with "M"
 ## return TRUE if they do; FALSE otherwise
 str_detect(names, "^M")
+```
+
+```
+## [1] FALSE  TRUE FALSE  TRUE
 ```
 
 ![str_detect() returns TRUE for strings that match the specified pattern; FALSE otherwise](https://docs.google.com/presentation/d/1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw/export/png?id=1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw&pageid=g38bb68a539_0_96)
@@ -1170,10 +1944,15 @@ str_detect(names, "^M")
 
 To return the actual string that matches the specified pattern, rather than a TRUE/FALSE, you'll look to `str_subset()`. This function pulls out those strings that match the specified pattern. For example, to obtain the subset of names whose values start with the capital letter "M", you would use the following:
 
-```{r}
+
+```r
 ## identify strings that start with "M"
 ## return whole string
 str_subset(names, "^M")
+```
+
+```
+## [1] "Mohammed" "Mathieu"
 ```
 
 ![`str_subset()` returns the strings that match the pattern specified](https://docs.google.com/presentation/d/1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw/export/png?id=1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw&pageid=g38bb68a539_0_102)
@@ -1182,10 +1961,15 @@ str_subset(names, "^M")
 
 To extract only the portions of the string that match the specified pattern, you would use `str_extract()`. This function returns the pattern specified for strings where it is found and NA otherwise. For example, by searching for names that start with M, below, we see that the second and fourth strings in our vector return the pattern specified ("M") and that the first and third strings in the vector return NA, as they do not start with a capital "M".
 
-```{r}
+
+```r
 ## return "M" from strings with "M" in it
 ## otherwise, return NA
 str_extract(names, "^M")
+```
+
+```
+## [1] NA  "M" NA  "M"
 ```
 
 ![`str_extract()` returns the portions of the strings that match the pattern specified](https://docs.google.com/presentation/d/1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw/export/png?id=1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw&pageid=g38bb68a539_0_122)
@@ -1194,9 +1978,14 @@ str_extract(names, "^M")
 
 The final basic function from `stringr` that we'll discuss is `str_replace()`. This function identifies a regex and replaces each occurrence with whatever replacement the user specifies. For example, below we search for strings that start with the capital letter "M" and replace each of them with a question mark. All strings that do *not* match the regex are returned unchanged.
 
-```{r}
+
+```r
 ## replace capital M with a question mark
 str_replace(names, "^M", "?")
+```
+
+```
+## [1] "Keisha"   "?ohammed" "Jane"     "?athieu"
 ```
 
 ![`str_replace()` replaces regex with specified characters](https://docs.google.com/presentation/d/1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw/export/png?id=1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw&pageid=g38bb68a539_0_131)
@@ -1209,10 +1998,13 @@ Above we discuss two common patterns searched for using regular expressions: sta
 
 To search for a set of characters, you place these characters within brackets. Below, this will identify anywhere in the strings where you have a lowercase vowel. Note, that we're now using `str_view_all()` to identify all occurrences of these characters, rather than `str_view()`, which only identifies the first occurrence in each string.
 
-```{r}
+
+```r
 ## identify all lowercase vowels
 str_view_all(names, "[aeiou]")
 ```
+
+![](03-tidying_files/figure-epub3/unnamed-chunk-76-1.png)<!-- -->
 
 ![brackets specify which characters to search for](https://docs.google.com/presentation/d/1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw/export/png?id=1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw&pageid=g38bb68a539_0_69)
 
@@ -1221,10 +2013,13 @@ str_view_all(names, "[aeiou]")
 
 By adding a caret (`^`) before the vowels within the brackets, this regular expressions specifies that you are searching for any character that is not a lowercase vowel within your strings.
 
-```{r}
+
+```r
 ## identify anything that's NOT a lowercase vowel
 str_view_all(names, "[^aeiou]")
 ```
+
+![](03-tidying_files/figure-epub3/unnamed-chunk-77-1.png)<!-- -->
 
 ![brackets with a caret first specify which characters NOT to search for](https://docs.google.com/presentation/d/1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw/export/png?id=1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw&pageid=g38bb68a539_0_78)
 
@@ -1232,12 +2027,15 @@ str_view_all(names, "[^aeiou]")
 
 To search for digits (numeric variable between 0 and 9) in a string you use "\d"; however, backslashes are protected characters in R. This means that you have to escape this character first with an additional backslash (`\`), to let R know that you want to search for the regular expression "\d".
 
-```{r}
+
+```r
 addresses <- c("1234 Main Street", "1600 Pennsylvania Ave", "Brick Building")
 
 ## identify anything that's a digit
 str_view_all(addresses, "\\d")
 ```
+
+![](03-tidying_files/figure-epub3/unnamed-chunk-78-1.png)<!-- -->
 
 ![`\d` searches for digits](https://docs.google.com/presentation/d/1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw/export/png?id=1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw&pageid=g38bb68a539_0_140)
 
@@ -1245,10 +2043,13 @@ str_view_all(addresses, "\\d")
 
 Identifying whitespace in R identifies any spaces, tabs or newlines. Note that again we have to escape the "\s" with a backslash for R to recognize the regular expression.
 
-```{r}
+
+```r
 ## identify any whitespace
 str_view_all(addresses, "\\s")
 ```
+
+![](03-tidying_files/figure-epub3/unnamed-chunk-79-1.png)<!-- -->
 
 ![`\s` searches for whitespace](https://docs.google.com/presentation/d/1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw/export/png?id=1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw&pageid=g38bb68a539_0_153)
 
@@ -1256,10 +2057,13 @@ str_view_all(addresses, "\\s")
 
 To identify any character except for a newline you'll use `"."`. Notice in our addresses example that there are no newlines, so this pattern will match with the entire string. 
 
-```{r}
+
+```r
 ## identify any character
 str_view_all(addresses, ".")
 ```
+
+![](03-tidying_files/figure-epub3/unnamed-chunk-80-1.png)<!-- -->
 
 ![. searches for any character](https://docs.google.com/presentation/d/1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw/export/png?id=1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw&pageid=g38bb68a539_0_164)
 
@@ -1279,49 +2083,68 @@ Searches for regular expressions allow you to specify how many times a pattern s
 
 Using the definitions above, we can see that the following code will identify patterns within the addresses vector where n shows up one more more times in a string. 
 
-```{r}
+
+```r
 ## identify any time n shows up one or more times
 str_view_all(addresses, "n+")
 ```
+
+![](03-tidying_files/figure-epub3/unnamed-chunk-81-1.png)<!-- -->
 
 ![+ specifies to match the pattern one or more times](https://docs.google.com/presentation/d/1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw/export/png?id=1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw&pageid=g38bb68a539_0_177)
 
 While the difference is slight in the output here, we're identifying portions of the string where n shows up exactly once. So, instead of the 'nn' in Pennsylvania matching together, the code here splits these up, due to the fact that we're specifying the pattern match 'n' exactly one time:
 
-```{r}
+
+```r
 ## identify any time n shows up
 str_view_all(addresses, "n{1}")
 ```
+
+![](03-tidying_files/figure-epub3/unnamed-chunk-82-1.png)<!-- -->
 
 ![{#} looks to match the pattern exactly the number of times within the curly braces](https://docs.google.com/presentation/d/1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw/export/png?id=1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw&pageid=g38bb68a539_0_183)
 
 If you only wanted to match strings where n showed up twice in a row, you could specify that in this way:
 
-```{r}
+
+```r
 ## identify any time n shows up exactly two times in a row
 str_view_all(addresses, "n{2}")
 ```
+
+![](03-tidying_files/figure-epub3/unnamed-chunk-83-1.png)<!-- -->
 
 ![{2} specifies that the pattern must be found exactly twice](https://docs.google.com/presentation/d/1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw/export/png?id=1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw&pageid=g38bb68a539_0_188)
 
 This could similarly be achieved by specifying to search for the pattern 'nn' one or more times (`+`):
 
-```{r}
+
+```r
 ## identify any time 'nn' shows up one or more times 
 str_view_all(addresses, "nn+")
 ```
+
+![](03-tidying_files/figure-epub3/unnamed-chunk-84-1.png)<!-- -->
 
 ![nn+ searches for double n one or more times in a string](https://docs.google.com/presentation/d/1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw/export/png?id=1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw&pageid=g38bb68a539_0_193)
 
 You can also specify a range of the number of times to search for a pattern within your string. Below, we see that if we specify n be searched for at least two and at most 3 times, the pattern matches within our string. However, if we increase that to between three and four times, no pattern matching occurs, as there are never three or four n's in a row in our strings.
 
-```{r}
+
+```r
 ## identify any time n shows up two or three times 
 str_view_all(addresses, "n{2,3}")
+```
 
+![](03-tidying_files/figure-epub3/unnamed-chunk-85-1.png)<!-- -->
+
+```r
 ## identify any time n shows up three or four times 
 str_view_all(addresses, "n{3,4}")
 ```
+
+![](03-tidying_files/figure-epub3/unnamed-chunk-85-2.png)<!-- -->
 
 ![{n,m} looks to pattern match between n and m times](https://docs.google.com/presentation/d/1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw/export/png?id=1-6k6usRR06dp-YK-M3HUOUgQZKXXqKnAD5RC4TISGhw&pageid=g38bb68a539_0_65)
 
@@ -1333,7 +2156,8 @@ Beyond using `stringr` to work with strings, there's an additional helpful packa
 
 To get started with this package, it will have to be installed and loaded in, as it is not a core tidyverse package.
 
-```{r message = FALSE}
+
+```r
 # install.packages("glue")
 library(glue)
 ```
@@ -1342,10 +2166,15 @@ So, if you want to pass an R variable directly into a string, that becomes simpl
 
 For example:
 
-```{r}
+
+```r
 # use glue to interpret string literal
 topic <- 'tidyverse'
 glue('My favorite thing to learn about is the {topic}!')
+```
+
+```
+## My favorite thing to learn about is the tidyverse!
 ```
 
 Note that the code above interprets the variable `topic` within the string specified in the `glue()` function. The variable is specified within curly braces: `{}`.
@@ -1354,11 +2183,29 @@ This becomes particularly helpful when combining information within a data frame
 
 For example, if we return to the `msleep` dataset with information about mammalian sleep, we could use `mutate()` to add a column summarizing the name of the animal, how many minutes the animal spends asleep and how many awake. Note that these columns are currently in hours, so we're going to convert that to minutes within the glue statement here:
 
-```{r}
+
+```r
 # add a description column using glue
 msleep %>%
   mutate(description = glue("The {name} typically sleeps for {sleep_total * 60} minutes and is awake for {awake * 60} minutes each day.")) %>% 
   select(name, sleep_total, awake, description)
+```
+
+```
+## # A tibble: 83 x 4
+##    name            sleep_total awake description                           
+##    <chr>                 <dbl> <dbl> <glue>                                
+##  1 Cheetah                12.1  11.9 The Cheetah typically sleeps for 726 …
+##  2 Owl monkey             17     7   The Owl monkey typically sleeps for 1…
+##  3 Mountain beaver        14.4   9.6 The Mountain beaver typically sleeps …
+##  4 Greater short-…        14.9   9.1 The Greater short-tailed shrew typica…
+##  5 Cow                     4    20   The Cow typically sleeps for 240 minu…
+##  6 Three-toed slo…        14.4   9.6 The Three-toed sloth typically sleeps…
+##  7 Northern fur s…         8.7  15.3 The Northern fur seal typically sleep…
+##  8 Vesper mouse            7    17   The Vesper mouse typically sleeps for…
+##  9 Dog                    10.1  13.9 The Dog typically sleeps for 606 minu…
+## 10 Roe deer                3    21   The Roe deer typically sleeps for 180…
+## # … with 73 more rows
 ```
 
 Note that we've selected the four columns used in this example with `select()` to focus on the output created using `glue()` in the `description` column. For each observation the information in description utilizes the appropriate information for that observation and the columns specified within the curly braces within the `glue()` function.
@@ -1369,7 +2216,8 @@ Beyond working with single strings and string literals, sometimes the informatio
 
 To get started, the package must be installed and loaded in:
 
-```{r message = FALSE}
+
+```r
 # install.packages("tidytext")
 library(tidytext)
 ```
@@ -1386,7 +2234,8 @@ After determining what level of information you're most interested in, you need 
 
 We'll use a bear bones example to demonstrate how it works. Below is text from the Shel Silverstein poem "Carrots" stored as a character vector:
 
-```{r}
+
+```r
 carrots <- c("They say that carrots are good for your eyes",
           "They swear that they improve your sight",
           "But I'm seein' worse than I did last night -",
@@ -1395,19 +2244,55 @@ carrots <- c("They say that carrots are good for your eyes",
 carrots
 ```
 
+```
+## [1] "They say that carrots are good for your eyes"
+## [2] "They swear that they improve your sight"     
+## [3] "But I'm seein' worse than I did last night -"
+## [4] "You think maybe I ain't usin' em right?"
+```
+
 For analysis, we'd need to get this into a tidy data format. So, first things first, let's get it into a data frame:
 
-```{r}
+
+```r
 text_df <- tibble(line = 1:4, text = carrots)
 
 text_df
 ```
 
+```
+## # A tibble: 4 x 2
+##    line text                                        
+##   <int> <chr>                                       
+## 1     1 They say that carrots are good for your eyes
+## 2     2 They swear that they improve your sight     
+## 3     3 But I'm seein' worse than I did last night -
+## 4     4 You think maybe I ain't usin' em right?
+```
+
 At this point we have a tibble with each line of the poem in a separate row. Now, we want to convert this using `unnest_tokens()` so that each row contains a single token, where, for this example, our token will be an individual word. This process is known as *tokenization*.
 
-```{r}
+
+```r
 text_df %>% 
   unnest_tokens(word, text)
+```
+
+```
+## # A tibble: 33 x 2
+##     line word   
+##    <int> <chr>  
+##  1     1 they   
+##  2     1 say    
+##  3     1 that   
+##  4     1 carrots
+##  5     1 are    
+##  6     1 good   
+##  7     1 for    
+##  8     1 your   
+##  9     1 eyes   
+## 10     2 they   
+## # … with 23 more rows
 ```
 
 Notice that the two arguments to the `unnest_tokens()` function. The first (`word` in our example) is the name of the token column in the output. The second (`text` in our example) is the name of the column in the input data frame (`text_df`) that should be used for tokenization.
@@ -1424,12 +2309,30 @@ To do this, the analyst must have access to or create a *lexicon*, a dictionary 
 
 However, this requires an additional package: `textdata`. Be sure this has been installed before using the `get_sentiments()` function.
 
-```{r}
+
+```r
 # be sure textdata is installed
 # install.packages("textdata")
 
 # see information stored in NRC lexicon
 get_sentiments('nrc')
+```
+
+```
+## # A tibble: 13,901 x 2
+##    word        sentiment
+##    <chr>       <chr>    
+##  1 abacus      trust    
+##  2 abandon     fear     
+##  3 abandon     negative 
+##  4 abandon     sadness  
+##  5 abandoned   anger    
+##  6 abandoned   fear     
+##  7 abandoned   negative 
+##  8 abandoned   sadness  
+##  9 abandonment anger    
+## 10 abandonment fear     
+## # … with 13,891 more rows
 ```
 
 Note: The first time you use this function R will prompt you to verify that you want to download the lexicon.
@@ -1438,21 +2341,65 @@ In the output you'll see words in the first column and the sentiment attached to
 
 Let's quantify the sentiment in the "Carrots" poem from above:
 
-```{r}
+
+```r
 text_df %>% 
   unnest_tokens(word, text) %>% 
   inner_join(get_sentiments('nrc'))
+```
+
+```
+## Joining, by = "word"
+```
+
+```
+## # A tibble: 14 x 3
+##     line word    sentiment   
+##    <int> <chr>   <chr>       
+##  1     1 good    anticipation
+##  2     1 good    joy         
+##  3     1 good    positive    
+##  4     1 good    surprise    
+##  5     1 good    trust       
+##  6     2 swear   positive    
+##  7     2 swear   trust       
+##  8     2 improve anticipation
+##  9     2 improve joy         
+## 10     2 improve positive    
+## 11     2 improve trust       
+## 12     3 worse   fear        
+## 13     3 worse   negative    
+## 14     3 worse   sadness
 ```
 
 Notice that the sentiments applied to each word are dependent upon the sentiments defined within the lexicon. Words that are missing or that are used differently than anticipated by those who generated the lexicon *could* be misclassified. Additionally, since we're using single word tokens, qualifiers are removed from context. So in the carrots poem, the word good in "are good for your eyes" would be given the same sentiment as good if the phrase were "are *not* good for your eyes." Thus, a lot context and nuance is lost in this approach. It's always important to consider the limitations of your analytical approach! 
 
 Above we found the sentiments for each token, but let's summarize that by counting the number of times each sentiment appears.
 
-```{r}
+
+```r
 text_df %>% 
   unnest_tokens(word, text) %>% 
   inner_join(get_sentiments('nrc')) %>%
   count(sentiment, sort = TRUE)
+```
+
+```
+## Joining, by = "word"
+```
+
+```
+## # A tibble: 8 x 2
+##   sentiment        n
+##   <chr>        <int>
+## 1 positive         3
+## 2 trust            3
+## 3 anticipation     2
+## 4 joy              2
+## 5 fear             1
+## 6 negative         1
+## 7 sadness          1
+## 8 surprise         1
 ```
 
 As we're analyzing a short poem, we see that only a few sentiments show up multiple times; however, using sentiment analysis on this poem suggests that the poem is generally positive, including words that convey trust, anticipation, and joy.
@@ -1467,7 +2414,8 @@ A document's ***inverse document frequency*** (idf) weights each term by its fre
 
 To see an example of this, we'll need a few more poems from Shel Silverstein for analysis. Here is *Invitation*:
 
-```{r}
+
+```r
 invitation <- c("If you are a dreamer, come in,",
   "If you are a dreamer, a wisher, a liar", 
   "A hope-er, a pray-er, a magic bean buyer…",
@@ -1481,9 +2429,23 @@ invitation <- tibble(line = 1:7, text = invitation, title = "Invitation")
 invitation
 ```
 
+```
+## # A tibble: 7 x 3
+##    line text                                        title     
+##   <int> <chr>                                       <chr>     
+## 1     1 If you are a dreamer, come in,              Invitation
+## 2     2 If you are a dreamer, a wisher, a liar      Invitation
+## 3     3 A hope-er, a pray-er, a magic bean buyer…   Invitation
+## 4     4 If you’re a pretender, come sit by my fire  Invitation
+## 5     5 For we have some flax-golden tales to spin. Invitation
+## 6     6 Come in!                                    Invitation
+## 7     7 Come in!                                    Invitation
+```
+
 And, here is masks:
 
-```{r}
+
+```r
 masks <- c("She had blue skin.", 
            "And so did he.", 
            "He kept it hid", 
@@ -1498,9 +2460,24 @@ masks <- tibble(line = 1:8, text = masks, title = "Masks")
 masks
 ```
 
+```
+## # A tibble: 8 x 3
+##    line text                     title
+##   <int> <chr>                    <chr>
+## 1     1 She had blue skin.       Masks
+## 2     2 And so did he.           Masks
+## 3     3 He kept it hid           Masks
+## 4     4 And so did she.          Masks
+## 5     5 They searched for blue   Masks
+## 6     6 Their whole life through Masks
+## 7     7 Then passed right by—    Masks
+## 8     8 And never knew           Masks
+```
+
 We'll combine all three poems into a single data frame for TF-IDF analysis. To do so, we'll first add a column to our carrots example from above so that it has a column for `title`:
 
-```{r}
+
+```r
 # add title to carrots poem
 carrots <- text_df %>% mutate(title = "Carrots")
 
@@ -1509,7 +2486,8 @@ poems <- bind_rows(carrots, invitation, masks)
 ```
 
 Now that we have our three documents (poems) in a single data frame, we can tokenize the text by word and calculate each tokens frequency within the document (poem).
-```{r}
+
+```r
 # count number of times word appwars within each text
 poem_words <- poems %>%
   unnest_tokens(word, text) %>%
@@ -1522,25 +2500,53 @@ total_words <- poem_words %>%
 
 # combine data frames
 poem_words <- left_join(poem_words, total_words)
+```
+
+```
+## Joining, by = "title"
+```
+
+```r
 poem_words
+```
+
+```
+## # A tibble: 82 x 4
+##    title      word      n total
+##    <chr>      <chr> <int> <int>
+##  1 Invitation a         8    48
+##  2 Invitation come      4    48
+##  3 Carrots    they      3    33
+##  4 Invitation if        3    48
+##  5 Invitation in        3    48
+##  6 Masks      and       3    31
+##  7 Carrots    i         2    33
+##  8 Carrots    that      2    33
+##  9 Carrots    your      2    33
+## 10 Invitation are       2    48
+## # … with 72 more rows
 ```
 
 Note that there are a different number of total words in each document, which is important to consider when you're comparing relative frequency between documents.
 
 We could visualize the number of times a word appears relative to document length as follows:
 
-```{r}
+
+```r
 # visualize frequency / total words in poem
 ggplot(poem_words, aes(n/total, fill = title)) +
   geom_histogram(show.legend = FALSE, bins = 5) +
   facet_wrap(~title, ncol = 3, scales = "free_y")
 ```
 
+![](03-tidying_files/figure-epub3/unnamed-chunk-100-1.png)<!-- -->
+
 With most documents there are only a few words that show up infrequently in the tail off to the right (rare words), while most words show up a whole bunch of times. 
 
 What we've just visualized is term frequency. We can add this quantity to our data frame:
 
-```{r}
+
+```r
 freq_by_rank <- poem_words %>% 
   group_by(title) %>% 
   mutate(rank = row_number(), 
@@ -1551,7 +2557,8 @@ Notice that words that appear most frequently will have the largest term frequen
 
 To calculate tf-idf, we can use `bind_tf_idf()`, specifying three arguments: the column including the token (`word`), the column specifying the document from which the token originated (`title`), and the column including the number of times the word appears (`n`):
 
-```{r}
+
+```r
 poem_words <- poem_words %>%
   bind_tf_idf(word, title, n)
 
@@ -1560,12 +2567,47 @@ poem_words %>%
   arrange(tf_idf)
 ```
 
+```
+## # A tibble: 82 x 7
+##    title      word      n total     tf   idf  tf_idf
+##    <chr>      <chr> <int> <int>  <dbl> <dbl>   <dbl>
+##  1 Carrots    for       1    33 0.0303 0     0      
+##  2 Invitation for       1    48 0.0208 0     0      
+##  3 Masks      for       1    31 0.0323 0     0      
+##  4 Invitation by        1    48 0.0208 0.405 0.00845
+##  5 Carrots    are       1    33 0.0303 0.405 0.0123 
+##  6 Carrots    did       1    33 0.0303 0.405 0.0123 
+##  7 Carrots    right     1    33 0.0303 0.405 0.0123 
+##  8 Carrots    you       1    33 0.0303 0.405 0.0123 
+##  9 Masks      by        1    31 0.0323 0.405 0.0131 
+## 10 Masks      right     1    31 0.0323 0.405 0.0131 
+## # … with 72 more rows
+```
+
 If we sort this output in ascending order by `tf_idf`, you'll notice that the word "for" has a `tf_idf` of 0. The data indicates that this word shows up with equal frequency across all three poems. It is *not* a word unique to any one poem.
 
-```{r}
+
+```r
 # sort descending
 poem_words %>%
   arrange(desc(tf_idf))
+```
+
+```
+## # A tibble: 82 x 7
+##    title      word      n total     tf   idf tf_idf
+##    <chr>      <chr> <int> <int>  <dbl> <dbl>  <dbl>
+##  1 Invitation a         8    48 0.167   1.10 0.183 
+##  2 Masks      and       3    31 0.0968  1.10 0.106 
+##  3 Invitation come      4    48 0.0833  1.10 0.0916
+##  4 Masks      blue      2    31 0.0645  1.10 0.0709
+##  5 Masks      he        2    31 0.0645  1.10 0.0709
+##  6 Masks      she       2    31 0.0645  1.10 0.0709
+##  7 Masks      so        2    31 0.0645  1.10 0.0709
+##  8 Invitation if        3    48 0.0625  1.10 0.0687
+##  9 Invitation in        3    48 0.0625  1.10 0.0687
+## 10 Carrots    i         2    33 0.0606  1.10 0.0666
+## # … with 72 more rows
 ```
 
 Alternatively, here we see the words most unique to the individual poems. "a" and "come" are most unique to *Invitation*, while "and" and "blue" are most unique to *Masks*. If we had removed stop words, we would have lost the fact that some common words are really unique in one of these poems relative to the others.
@@ -1574,7 +2616,8 @@ Again, we're looking at a limited amount of text here, but this analysis can be 
 
 We can summarize these tf-idf results by visualizing the words with the highest tf-idf in each of these poems:
 
-```{r}
+
+```r
 poem_words %>%
   arrange(desc(tf_idf)) %>%
   mutate(word = factor(word, levels = rev(unique(word)))) %>% 
@@ -1587,6 +2630,12 @@ poem_words %>%
   facet_wrap(~title, ncol = 3, scales = "free") +
   coord_flip()
 ```
+
+```
+## Selecting by tf_idf
+```
+
+![](03-tidying_files/figure-epub3/unnamed-chunk-104-1.png)<!-- -->
 
 
 ## Functional Programming
@@ -1603,10 +2652,28 @@ In base R, you likely found yourself writing for loops for iteration. For exampl
 
 Let's use an example to demonstrate what we mean by this. What if you had a data frame and wanted the median value for each column in the data frame? To see how you could approach this, we'll use the `trees` dataset available by default from R:
 
-```{r}
+
+```r
 # see dataset
 trees <- as_tibble(trees)
 trees
+```
+
+```
+## # A tibble: 31 x 3
+##    Girth Height Volume
+##    <dbl>  <dbl>  <dbl>
+##  1   8.3     70   10.3
+##  2   8.6     65   10.3
+##  3   8.8     63   10.2
+##  4  10.5     72   16.4
+##  5  10.7     81   18.8
+##  6  10.8     83   19.7
+##  7  11       66   15.6
+##  8  11       75   18.2
+##  9  11.1     80   22.6
+## 10  11.2     75   19.9
+## # … with 21 more rows
 ```
 
 The dataset contains the diameter, height, and volume of 31 Black Cherry trees. 
@@ -1615,13 +2682,30 @@ The dataset contains the diameter, height, and volume of 31 Black Cherry trees.
 
 To calculate the median for each column, you could do the following:
 
-```{r}
+
+```r
 # calculate median of each column
 median(trees$Girth)
+```
 
+```
+## [1] 12.9
+```
+
+```r
 median(trees$Height)
+```
 
+```
+## [1] 76
+```
+
+```r
 median(trees$Volume)
+```
+
+```
+## [1] 24.2
 ```
 
 This would get you your answer; however, this breaks the programming rule that you shouldn't copy and paste more than once. And, you could imagine that if you had more than three columns, this would be a *huge* pain and involve a whole lot of copy and pasting and editing.
@@ -1630,7 +2714,8 @@ This would get you your answer; however, this breaks the programming rule that y
 
 A second approach would be to use a for loop. You would loop through all the columns in the data frame, calculate the median, record that value and store that information in a variable. 
 
-```{r}
+
+```r
 # create output vector
 output <- vector("double", ncol(trees)) 
 
@@ -1641,6 +2726,10 @@ for (i in seq_along(trees)) {
 output
 ```
 
+```
+## [1] 12.9 76.0 24.2
+```
+
 This allows us to obtain the same information as the copy + paste method; however, it scales better if there are more than three columns in your data frame, making it a better option than the copy + paste method.
 
 But, what if you frequently want to take the median of the columns in your data frame? What if you want to do this more than once? You would have to go in, copy + paste this code and change the name of the data frame each time. This would break the don't copy + paste more than once rule.
@@ -1649,7 +2738,8 @@ But, what if you frequently want to take the median of the columns in your data 
 
 This brings us to the function approach. Here, we wrap the for loop into a function so that we can execute a function on our data. frame whenever we want to accomplish the task of calculating the median for each column:
 
-```{r}
+
+```r
 # create function
 col_median <- function(df) {
   output <- vector("double", length(df))
@@ -1661,6 +2751,10 @@ col_median <- function(df) {
 
 # execute function
 col_median(trees)
+```
+
+```
+## [1] 12.9 76.0 24.2
 ```
 
 Again, the output information from trees is the same for this specific example, but now we see that we could use the `col_median()` function any time we want to calculate the medians across columns within a data frame!
@@ -1686,18 +2780,30 @@ Note that the input to a `map` function requires you to first specify a vector i
 
 When it comes to our specific task, this is implemented as follows using `map_dbl()`:
 
-```{r}
+
+```r
 # use purrr to calculate median
 map_dbl(trees, median)
+```
+
+```
+##  Girth Height Volume 
+##   12.9   76.0   24.2
 ```
 
 Here, we use the `map_dbl()` function from `purrr` to iterate over the columns of trees and calculate the median. And, it even displays the variable name in the output for us - all in a single function call.
 
 Note the flexibility! We've just passed the `median()` function *into* another function: `map_dbl`. This means that if we changed our minds and wanted mean instead, we could accomplish that with ease:
 
-```{r}
+
+```r
 # use purrr to calculate mean
 map_dbl(trees, mean)
+```
+
+```
+##    Girth   Height   Volume 
+## 13.24839 76.00000 30.17097
 ```
 
 This function exists because looping to do something to each element and saving the results is such a common task, that there is  family of functions (one of which is `map_dbl`) to do it for you to accomplish such tasks in `purrr`.
@@ -1708,9 +2814,15 @@ In the example above `mean` could have been any function, denoted in the `purrr`
 
 After `.f` in `purrr` functions, you can pass additional arguments. These go *after* the specified function. For example, below, we specify that we'd like to remove NAs, by specifying an argument to be passed to the `mean()` function after the function call (`mean`):
 
-```{r}
+
+```r
 # use purrr to calculate mean
 map_dbl(trees, mean, na.rm = TRUE)
+```
+
+```
+##    Girth   Height   Volume 
+## 13.24839 76.00000 30.17097
 ```
 
 ### `map` functions
@@ -1750,7 +2862,8 @@ Thus, we have two vectors we want to operate over, `Girth` and `Height`, so we'l
 
 Let's first generate a function that will calculate volume for us from the information in our `trees` dataset:
 
-```{r}
+
+```r
 # generate volume function
 volume <- function(diameter, height){
   # convert diameter in inches to raidus in feet
@@ -1763,26 +2876,60 @@ volume <- function(diameter, height){
 
 Now, we can utilize `map2` then to calculate the volume from these two input vectors:
 
-```{r}
+
+```r
 # calculate volume
 map2_dbl(trees$Girth, trees$Height, volume)
 ```
 
+```
+##  [1]  26.30157  26.22030  26.60929  43.29507  50.58013  52.80232  43.55687
+##  [8]  49.49645  53.76050  51.31268  55.01883  53.87046  53.87046  51.51672
+## [15]  58.90486  67.16431  77.14819  82.97153  72.68200  66.47610  83.38311
+## [22]  87.98205  84.85845 100.53096 111.58179 132.22227 136.96744 139.80524
+## [29] 141.37167 141.37167 201.36365
+```
+
 Here the output is on the same order as the `Volume` column from the dataset, but the numbers are off, suggesting that the dataset calculated volume of the tree differently than we did in our approach.
 
-```{r}
+
+```r
 trees$Volume
+```
+
+```
+##  [1] 10.3 10.3 10.2 16.4 18.8 19.7 15.6 18.2 22.6 19.9 24.2 21.0 21.4 21.3
+## [15] 19.1 22.2 33.8 27.4 25.7 24.9 34.5 31.7 36.3 38.3 42.6 55.4 55.7 58.3
+## [29] 51.5 51.0 77.0
 ```
 
 Note that there are all the same variations that exist for `map_` exist for `map2()`, so you're able to use `map2_chr()` and `map2_dbl()`, etc. 
 
 Additionally, the `map` functions work well within our `dplyr` approach to working with data. Here, we add the output for our volume calculation to the trees dataset as well as a column (`volume_diff`) that displays the difference between our volume calculation and that reported in the dataset: 
 
-```{r}
+
+```r
 # calculate volume
 trees %>%
   mutate(volume_cylinder = map2_dbl(trees$Girth, trees$Height, volume),
          volume_diff = Volume - volume_cylinder)
+```
+
+```
+## # A tibble: 31 x 5
+##    Girth Height Volume volume_cylinder volume_diff
+##    <dbl>  <dbl>  <dbl>           <dbl>       <dbl>
+##  1   8.3     70   10.3            26.3       -16.0
+##  2   8.6     65   10.3            26.2       -15.9
+##  3   8.8     63   10.2            26.6       -16.4
+##  4  10.5     72   16.4            43.3       -26.9
+##  5  10.7     81   18.8            50.6       -31.8
+##  6  10.8     83   19.7            52.8       -33.1
+##  7  11       66   15.6            43.6       -28.0
+##  8  11       75   18.2            49.5       -31.3
+##  9  11.1     80   22.6            53.8       -31.2
+## 10  11.2     75   19.9            51.3       -31.4
+## # … with 21 more rows
 ```
 
 #### `pmap`
@@ -1802,16 +2949,34 @@ Note that `.l` is a list of all the input vectors, so you are no longer specifyi
 
 In our `map2()` example we created a separate function to calculate volume; however, as this is a specific scenario for volume calculation, we likely won't need that function again later. In such scenarios, it can be helpful to utilize an **anonymous function**. This is a function that is not given a name but that is utilized within our `map` call. We are *not* able to refer back to this function later, but we *are* able to use it within our `map` call:
 
-```{r}
+
+```r
 map2_dbl(trees$Girth, trees$Height, function(x,y){ pi * ((x/2)/12)^2 * y})
+```
+
+```
+##  [1]  26.30157  26.22030  26.60929  43.29507  50.58013  52.80232  43.55687
+##  [8]  49.49645  53.76050  51.31268  55.01883  53.87046  53.87046  51.51672
+## [15]  58.90486  67.16431  77.14819  82.97153  72.68200  66.47610  83.38311
+## [22]  87.98205  84.85845 100.53096 111.58179 132.22227 136.96744 139.80524
+## [29] 141.37167 141.37167 201.36365
 ```
 
 In this example, we create the anonymous function within the `map2_dbl()` call. This allows volume to be calculated as before, but does so without having to define a function.
 
 This becomes particularly helpful within `purrr` if you want to refer to the individual elements of your `map` call directly. This is done by specifying `.x` and `.y` to refer to the first and second input vectors, respectively:
 
-```{r}
+
+```r
 map2_dbl(trees$Girth, trees$Height, ~ pi * ((.x/2)/12)^2 * .y)
+```
+
+```
+##  [1]  26.30157  26.22030  26.60929  43.29507  50.58013  52.80232  43.55687
+##  [8]  49.49645  53.76050  51.31268  55.01883  53.87046  53.87046  51.51672
+## [15]  58.90486  67.16431  77.14819  82.97153  72.68200  66.47610  83.38311
+## [22]  87.98205  84.85845 100.53096 111.58179 132.22227 136.96744 139.80524
+## [29] 141.37167 141.37167 201.36365
 ```
 
 Here, we see the same output; however, the syntax defines an anonymous function using the formula syntax.
@@ -1938,27 +3103,100 @@ This means that we'll need all the data from the variables necessary to answer t
 
 Let's remind ourselves before we get to wrangling what data we have when it comes to healthcare coverage.
 
-```{r, echo = FALSE}
-if (!exists("coverage")) {
-  coverage <- readr::read_csv('https://raw.githubusercontent.com/opencasestudies/ocs-healthexpenditure/master/data/KFF/healthcare-coverage.csv', 
-                              skip = 2)
-  ## read coverage data into R
-  coverage <- readr::read_csv('https://raw.githubusercontent.com/opencasestudies/ocs-healthexpenditure/master/data/KFF/healthcare-coverage.csv', 
-                       skip = 2,
-                       n_max  = which(coverage$Location == "Notes")-1)  
-}
+
+```
+## Parsed with column specification:
+## cols(
+##   .default = col_double(),
+##   Location = col_character(),
+##   `2013__Other Public` = col_character(),
+##   `2014__Other Public` = col_character(),
+##   `2015__Other Public` = col_character(),
+##   `2016__Other Public` = col_character()
+## )
 ```
 
-```{r}
+```
+## See spec(...) for full column specifications.
+```
+
+```
+## Warning: 26 parsing failures.
+## row col   expected    actual                                                                                                              file
+##  53  -- 29 columns 1 columns 'https://raw.githubusercontent.com/opencasestudies/ocs-healthexpenditure/master/data/KFF/healthcare-coverage.csv'
+##  54  -- 29 columns 1 columns 'https://raw.githubusercontent.com/opencasestudies/ocs-healthexpenditure/master/data/KFF/healthcare-coverage.csv'
+##  55  -- 29 columns 1 columns 'https://raw.githubusercontent.com/opencasestudies/ocs-healthexpenditure/master/data/KFF/healthcare-coverage.csv'
+##  56  -- 29 columns 1 columns 'https://raw.githubusercontent.com/opencasestudies/ocs-healthexpenditure/master/data/KFF/healthcare-coverage.csv'
+##  57  -- 29 columns 1 columns 'https://raw.githubusercontent.com/opencasestudies/ocs-healthexpenditure/master/data/KFF/healthcare-coverage.csv'
+## ... ... .......... ......... .................................................................................................................
+## See problems(...) for more details.
+```
+
+```
+## Parsed with column specification:
+## cols(
+##   .default = col_double(),
+##   Location = col_character(),
+##   `2013__Other Public` = col_character(),
+##   `2014__Other Public` = col_character(),
+##   `2015__Other Public` = col_character(),
+##   `2016__Other Public` = col_character()
+## )
+## See spec(...) for full column specifications.
+```
+
+
+```r
 coverage
+```
+
+```
+## # A tibble: 52 x 29
+##    Location `2013__Employer` `2013__Non-Grou… `2013__Medicaid`
+##    <chr>               <dbl>            <dbl>            <dbl>
+##  1 United …        155696900         13816000         54919100
+##  2 Alabama           2126500           174200           869700
+##  3 Alaska             364900            24000            95000
+##  4 Arizona           2883800           170800          1346100
+##  5 Arkansas          1128800           155600           600800
+##  6 Califor…         17747300          1986400          8344800
+##  7 Colorado          2852500           426300           697300
+##  8 Connect…          2030500           126800           532000
+##  9 Delaware           473700            25100           192700
+## 10 Distric…           324300            30400           174900
+## # … with 42 more rows, and 25 more variables: `2013__Medicare` <dbl>,
+## #   `2013__Other Public` <chr>, `2013__Uninsured` <dbl>,
+## #   `2013__Total` <dbl>, `2014__Employer` <dbl>, `2014__Non-Group` <dbl>,
+## #   `2014__Medicaid` <dbl>, `2014__Medicare` <dbl>, `2014__Other
+## #   Public` <chr>, `2014__Uninsured` <dbl>, `2014__Total` <dbl>,
+## #   `2015__Employer` <dbl>, `2015__Non-Group` <dbl>,
+## #   `2015__Medicaid` <dbl>, `2015__Medicare` <dbl>, `2015__Other
+## #   Public` <chr>, `2015__Uninsured` <dbl>, `2015__Total` <dbl>,
+## #   `2016__Employer` <dbl>, `2016__Non-Group` <dbl>,
+## #   `2016__Medicaid` <dbl>, `2016__Medicare` <dbl>, `2016__Other
+## #   Public` <chr>, `2016__Uninsured` <dbl>, `2016__Total` <dbl>
 ```
 
 At a glance, we see that state-level information is stored in rows (with the exception of th first row, which stores country-level information) with columns corresponding to the amount of money spent on each type of healtcare, by year. 
 
 If we focus in on the columns wtihin this dataframe, we see that we have a number of different typesof health care (i.e. employer, medicare, medicaid, etc.) for each year between 2013 and 2016:
 
-```{r}
+
+```r
 colnames(coverage)
+```
+
+```
+##  [1] "Location"           "2013__Employer"     "2013__Non-Group"   
+##  [4] "2013__Medicaid"     "2013__Medicare"     "2013__Other Public"
+##  [7] "2013__Uninsured"    "2013__Total"        "2014__Employer"    
+## [10] "2014__Non-Group"    "2014__Medicaid"     "2014__Medicare"    
+## [13] "2014__Other Public" "2014__Uninsured"    "2014__Total"       
+## [16] "2015__Employer"     "2015__Non-Group"    "2015__Medicaid"    
+## [19] "2015__Medicare"     "2015__Other Public" "2015__Uninsured"   
+## [22] "2015__Total"        "2016__Employer"     "2016__Non-Group"   
+## [25] "2016__Medicaid"     "2016__Medicare"     "2016__Other Public"
+## [28] "2016__Uninsured"    "2016__Total"
 ```
 
 While a lot of information in here will be helpful, it's not in a tidy format. This is because, each variable is not in a separate column. For example, each column includes year, the type of coverage *and* the amount spent by state. We'll want to use each piece of information separately downstream as we start to visualize and analyze these data. So, let's work to get these pieces of information separated out now.
@@ -1971,17 +3209,36 @@ To accomplish this, the first thing we'll have to do is reshape the data, using 
 
 Here, we create a column titled `year_type` and `tot_coverage`, storing this newly formatted dataframe back into the variable name `coverage`. We also want to keep the Location column as it is because it also contains observational level data.
 
-```{r}
+
+```r
 coverage <- gather(coverage, "year_type", "tot_coverage", -Location)
 
 coverage
+```
+
+```
+## # A tibble: 1,456 x 3
+##    Location             year_type      tot_coverage
+##    <chr>                <chr>          <chr>       
+##  1 United States        2013__Employer 155696900   
+##  2 Alabama              2013__Employer 2126500     
+##  3 Alaska               2013__Employer 364900      
+##  4 Arizona              2013__Employer 2883800     
+##  5 Arkansas             2013__Employer 1128800     
+##  6 California           2013__Employer 17747300    
+##  7 Colorado             2013__Employer 2852500     
+##  8 Connecticut          2013__Employer 2030500     
+##  9 Delaware             2013__Employer 473700      
+## 10 District of Columbia 2013__Employer 324300      
+## # … with 1,446 more rows
 ```
 
 Great! We still have `Location` stored in a single column, but we've separated out `year_type` and `tot_coverage` into their own columns, storing all of the information in a **long** data format.
 
 Unfortunately, the `year_type` column still contains two pieces of information. We'll want to separate these out to ensure that the data are in a properly tidy format. To do this, we'll look to use the `separate()` function, which allows us to separate out the information stored in a single column into two columns. We'llalso use the `convert=TRUE` argument to convert the character to an integer.
 
-```{r}
+
+```r
 coverage <- coverage %>% 
   separate(year_type, sep="__", 
            into=c("year", "type"), 
@@ -1990,13 +3247,31 @@ coverage <- coverage %>%
 coverage
 ```
 
+```
+## # A tibble: 1,456 x 4
+##    Location              year type     tot_coverage
+##    <chr>                <int> <chr>    <chr>       
+##  1 United States         2013 Employer 155696900   
+##  2 Alabama               2013 Employer 2126500     
+##  3 Alaska                2013 Employer 364900      
+##  4 Arizona               2013 Employer 2883800     
+##  5 Arkansas              2013 Employer 1128800     
+##  6 California            2013 Employer 17747300    
+##  7 Colorado              2013 Employer 2852500     
+##  8 Connecticut           2013 Employer 2030500     
+##  9 Delaware              2013 Employer 473700      
+## 10 District of Columbia  2013 Employer 324300      
+## # … with 1,446 more rows
+```
+
 Perfect! We now have the four columns we wanted, each storing a separate piece of information, *and* the year column is an integer, as you would want it to be! 
 
 The other columns remain character type information. That makes sense for Location and type, but not for `tot_coverage`. Let's change that to be numeric as well using the `mutate_at()` function from `dplyr`. 
 
 Here, we are specifying that we want to take the `tot_coverage` column and convert it to an integer and then replace the old column with the newly-converted column.
 
-```{r warning = FALSE}
+
+```r
 coverage <- 
   coverage %>% 
   mutate_at("tot_coverage", as.integer)
@@ -2004,16 +3279,51 @@ coverage <-
 coverage
 ```
 
+```
+## # A tibble: 1,456 x 4
+##    Location              year type     tot_coverage
+##    <chr>                <int> <chr>           <int>
+##  1 United States         2013 Employer    155696900
+##  2 Alabama               2013 Employer      2126500
+##  3 Alaska                2013 Employer       364900
+##  4 Arizona               2013 Employer      2883800
+##  5 Arkansas              2013 Employer      1128800
+##  6 California            2013 Employer     17747300
+##  7 Colorado              2013 Employer      2852500
+##  8 Connecticut           2013 Employer      2030500
+##  9 Delaware              2013 Employer       473700
+## 10 District of Columbia  2013 Employer       324300
+## # … with 1,446 more rows
+```
+
 Great, our variables are now all of the appropriate type!
 
 Let's go one step further and add in the state-level abbreviations and region for each row. We'll utilize our `state` datasets that we read in previously to accomplish this!
 
-```{r}
+
+```r
 # Add the abbreviation of States
 coverage$abb <- state.abb[match(coverage$Location, state.name)]
 coverage$region <- state.region[match(coverage$Location, state.name)]
 
 coverage
+```
+
+```
+## # A tibble: 1,456 x 6
+##    Location              year type     tot_coverage abb   region   
+##    <chr>                <int> <chr>           <int> <chr> <fct>    
+##  1 United States         2013 Employer    155696900 <NA>  <NA>     
+##  2 Alabama               2013 Employer      2126500 AL    South    
+##  3 Alaska                2013 Employer       364900 AK    West     
+##  4 Arizona               2013 Employer      2883800 AZ    West     
+##  5 Arkansas              2013 Employer      1128800 AR    South    
+##  6 California            2013 Employer     17747300 CA    West     
+##  7 Colorado              2013 Employer      2852500 CO    West     
+##  8 Connecticut           2013 Employer      2030500 CT    Northeast
+##  9 Delaware              2013 Employer       473700 DE    South    
+## 10 District of Columbia  2013 Employer       324300 <NA>  <NA>     
+## # … with 1,446 more rows
 ```
 
 Perfect! At this point, each row is an observation, each column stores a single piece of information. This dataset is now in good shape!
@@ -2022,20 +3332,78 @@ Perfect! At this point, each row is an observation, each column stores a single 
 
 We'll have to take a similar approach when it comes to tidying the spending data as it has a similar structure to how the coverage data were stored.
 
-```{r, echo = FALSE}
-spending <- read_csv('https://raw.githubusercontent.com/opencasestudies/ocs-healthexpenditure/master/data/KFF/healthcare-spending.csv', 
-                     skip = 2)
-spending <- read_csv('https://raw.githubusercontent.com/opencasestudies/ocs-healthexpenditure/master/data/KFF/healthcare-spending.csv', 
-                     skip = 2, 
-                     n_max  = which(spending$Location == "Notes")-1)
+
 ```
-```{r}
+## Parsed with column specification:
+## cols(
+##   .default = col_double(),
+##   Location = col_character()
+## )
+```
+
+```
+## See spec(...) for full column specifications.
+```
+
+```
+## Warning: 12 parsing failures.
+## row col   expected    actual                                                                                                              file
+##  53  -- 25 columns 1 columns 'https://raw.githubusercontent.com/opencasestudies/ocs-healthexpenditure/master/data/KFF/healthcare-spending.csv'
+##  54  -- 25 columns 1 columns 'https://raw.githubusercontent.com/opencasestudies/ocs-healthexpenditure/master/data/KFF/healthcare-spending.csv'
+##  55  -- 25 columns 1 columns 'https://raw.githubusercontent.com/opencasestudies/ocs-healthexpenditure/master/data/KFF/healthcare-spending.csv'
+##  56  -- 25 columns 1 columns 'https://raw.githubusercontent.com/opencasestudies/ocs-healthexpenditure/master/data/KFF/healthcare-spending.csv'
+##  57  -- 25 columns 1 columns 'https://raw.githubusercontent.com/opencasestudies/ocs-healthexpenditure/master/data/KFF/healthcare-spending.csv'
+## ... ... .......... ......... .................................................................................................................
+## See problems(...) for more details.
+```
+
+```
+## Parsed with column specification:
+## cols(
+##   .default = col_double(),
+##   Location = col_character()
+## )
+## See spec(...) for full column specifications.
+```
+
+```r
 spending
+```
+
+```
+## # A tibble: 52 x 25
+##    Location `1991__Total He… `1992__Total He… `1993__Total He…
+##    <chr>               <dbl>            <dbl>            <dbl>
+##  1 United …           675896           731455           778684
+##  2 Alabama             10393            11284            12028
+##  3 Alaska               1458             1558             1661
+##  4 Arizona              9269             9815            10655
+##  5 Arkansas             5632             6022             6397
+##  6 Califor…            81438            87949            91963
+##  7 Colorado             8460             9215             9803
+##  8 Connect…            10950            11635            12081
+##  9 Delaware             1938             2111             2285
+## 10 Distric…             2800             3098             3240
+## # … with 42 more rows, and 21 more variables: `1994__Total Health
+## #   Spending` <dbl>, `1995__Total Health Spending` <dbl>, `1996__Total
+## #   Health Spending` <dbl>, `1997__Total Health Spending` <dbl>,
+## #   `1998__Total Health Spending` <dbl>, `1999__Total Health
+## #   Spending` <dbl>, `2000__Total Health Spending` <dbl>, `2001__Total
+## #   Health Spending` <dbl>, `2002__Total Health Spending` <dbl>,
+## #   `2003__Total Health Spending` <dbl>, `2004__Total Health
+## #   Spending` <dbl>, `2005__Total Health Spending` <dbl>, `2006__Total
+## #   Health Spending` <dbl>, `2007__Total Health Spending` <dbl>,
+## #   `2008__Total Health Spending` <dbl>, `2009__Total Health
+## #   Spending` <dbl>, `2010__Total Health Spending` <dbl>, `2011__Total
+## #   Health Spending` <dbl>, `2012__Total Health Spending` <dbl>,
+## #   `2013__Total Health Spending` <dbl>, `2014__Total Health
+## #   Spending` <dbl>
 ```
 
 Here, we reshape the data using `year` and `tot_spending` for the key and value. We also want to keep `Location` like before. Then, in the `separate()` function, we create two new columns called `year` and `name.` Then, we ask to return all the columns, *except* name. To select all the columns except a specific column, use the `-` (subtraction) operator. (This process is also referred to as negative indexing.)
 
-```{r}
+
+```r
 # take spending data from wide to long
 spending <- gather(spending, "year", "tot_spending", -Location)
 
@@ -2048,6 +3416,23 @@ spending <- spending %>%
 spending
 ```
 
+```
+## # A tibble: 1,248 x 3
+##    Location              year tot_spending
+##    <chr>                <int>        <dbl>
+##  1 United States         1991       675896
+##  2 Alabama               1991        10393
+##  3 Alaska                1991         1458
+##  4 Arizona               1991         9269
+##  5 Arkansas              1991         5632
+##  6 California            1991        81438
+##  7 Colorado              1991         8460
+##  8 Connecticut           1991        10950
+##  9 Delaware              1991         1938
+## 10 District of Columbia  1991         2800
+## # … with 1,238 more rows
+```
+
 Perfect, we have a tidy dataset and the type of information stored in each column is appropriate for the information being stored in the column!
 
 #### Join the Data
@@ -2057,7 +3442,8 @@ At this point, we have a `coverage` dataset and a `spending` dataset, but ultima
 We have to decide what type of join we want to do. For our questions, we only want information from years that are found in both the `coverage` and the `spending` datasets. This means that we'll want to do an `inner_join()`. This will keep the data from the intersection of years from `coverage` and  `spending` (meaning only 2013 and 2014). We'll store this in a new variable: `hc`.
 
 
-```{r}
+
+```r
 # inner join to combine data frames
 hc <- inner_join(coverage, spending, 
                  by = c("Location", "year"))
@@ -2065,9 +3451,27 @@ hc <- inner_join(coverage, spending,
 hc
 ```
 
+```
+## # A tibble: 728 x 7
+##    Location           year type    tot_coverage abb   region   tot_spending
+##    <chr>             <int> <chr>          <int> <chr> <fct>           <dbl>
+##  1 United States      2013 Employ…    155696900 <NA>  <NA>          2435624
+##  2 Alabama            2013 Employ…      2126500 AL    South           33788
+##  3 Alaska             2013 Employ…       364900 AK    West             7684
+##  4 Arizona            2013 Employ…      2883800 AZ    West            41481
+##  5 Arkansas           2013 Employ…      1128800 AR    South           20500
+##  6 California         2013 Employ…     17747300 CA    West           278168
+##  7 Colorado           2013 Employ…      2852500 CO    West            34090
+##  8 Connecticut        2013 Employ…      2030500 CT    Northea…        34223
+##  9 Delaware           2013 Employ…       473700 DE    South            9038
+## 10 District of Colu…  2013 Employ…       324300 <NA>  <NA>             7443
+## # … with 718 more rows
+```
+
 Great, we've combined the information in our datasets. But, we've got a bit of extraneous information remaining. For example, we want to look only at the state-level. So, let's filter out the country-level summary row:
 
-```{r}
+
+```r
 # filter to only include state level
 hc <- hc %>% 
   filter(Location != "United States")
@@ -2075,13 +3479,23 @@ hc <- hc %>%
 
 Another problem is that inside our `hc` dataset, there are multiple types of healthcare coverage.
 
-```{r}
+
+```r
 table(hc$type)
+```
+
+```
+## 
+##     Employer     Medicaid     Medicare    Non-Group Other Public 
+##          102          102          102          102          102 
+##        Total    Uninsured 
+##          102          102
 ```
 
 The "Total" type is not really a formal type of healthcare coverage. It really represents just the total number of people in the state. This is useful information and we can include it as a column called `tot_pop`. To accomplish this, we'll first store this information in a data frame called `pop`.
 
-```{r}
+
+```r
 pop <- hc %>% 
   filter(type == "Total") %>% 
   select(Location, year, tot_coverage)
@@ -2089,9 +3503,27 @@ pop <- hc %>%
 pop
 ```
 
+```
+## # A tibble: 102 x 3
+##    Location              year tot_coverage
+##    <chr>                <int>        <int>
+##  1 Alabama               2013      4763900
+##  2 Alaska                2013       702000
+##  3 Arizona               2013      6603100
+##  4 Arkansas              2013      2904800
+##  5 California            2013     38176400
+##  6 Colorado              2013      5297800
+##  7 Connecticut           2013      3578900
+##  8 Delaware              2013       909300
+##  9 District of Columbia  2013       652100
+## 10 Florida               2013     19429000
+## # … with 92 more rows
+```
+
 We can then, using a `left_join` to ensure we keep all of the rows in the `hc` data frame in tact, add this population level information while simultaneously removing the rows where `type` is "Total" from teh dataset. Finally, we'll rename the columns to be informative of the information stored within: 
 
-```{r}
+
+```r
 # ad population level information
 hc <- hc %>% 
   filter(type != "Total") %>% 
@@ -2102,9 +3534,27 @@ hc <- hc %>%
 hc
 ```
 
+```
+## # A tibble: 612 x 8
+##    Location      year type   tot_coverage abb   region tot_spending tot_pop
+##    <chr>        <int> <chr>         <int> <chr> <fct>         <dbl>   <int>
+##  1 Alabama       2013 Emplo…      2126500 AL    South         33788  4.76e6
+##  2 Alaska        2013 Emplo…       364900 AK    West           7684  7.02e5
+##  3 Arizona       2013 Emplo…      2883800 AZ    West          41481  6.60e6
+##  4 Arkansas      2013 Emplo…      1128800 AR    South         20500  2.90e6
+##  5 California    2013 Emplo…     17747300 CA    West         278168  3.82e7
+##  6 Colorado      2013 Emplo…      2852500 CO    West          34090  5.30e6
+##  7 Connecticut   2013 Emplo…      2030500 CT    North…        34223  3.58e6
+##  8 Delaware      2013 Emplo…       473700 DE    South          9038  9.09e5
+##  9 District of…  2013 Emplo…       324300 <NA>  <NA>           7443  6.52e5
+## 10 Florida       2013 Emplo…      8023400 FL    South        150547  1.94e7
+## # … with 602 more rows
+```
+
 From here, instead of only storing the absolute number of people who are covered (`tot_coverage`), we will calculate the proportion of people who are coverage in each state, year and type, storing this information in `prop_coverage`.
 
-```{r}
+
+```r
 # add proportion covered
 hc <- hc %>% 
     mutate(prop_coverage = tot_coverage/tot_pop) 
@@ -2112,14 +3562,50 @@ hc <- hc %>%
 hc
 ```
 
+```
+## # A tibble: 612 x 9
+##    Location  year type  tot_coverage abb   region tot_spending tot_pop
+##    <chr>    <int> <chr>        <int> <chr> <fct>         <dbl>   <int>
+##  1 Alabama   2013 Empl…      2126500 AL    South         33788  4.76e6
+##  2 Alaska    2013 Empl…       364900 AK    West           7684  7.02e5
+##  3 Arizona   2013 Empl…      2883800 AZ    West          41481  6.60e6
+##  4 Arkansas  2013 Empl…      1128800 AR    South         20500  2.90e6
+##  5 Califor…  2013 Empl…     17747300 CA    West         278168  3.82e7
+##  6 Colorado  2013 Empl…      2852500 CO    West          34090  5.30e6
+##  7 Connect…  2013 Empl…      2030500 CT    North…        34223  3.58e6
+##  8 Delaware  2013 Empl…       473700 DE    South          9038  9.09e5
+##  9 Distric…  2013 Empl…       324300 <NA>  <NA>           7443  6.52e5
+## 10 Florida   2013 Empl…      8023400 FL    South        150547  1.94e7
+## # … with 602 more rows, and 1 more variable: prop_coverage <dbl>
+```
+
 The `tot_spending` column is reported in millions (1e6). Therefore, to calculate `spending_capita` we will need to adjust for this scaling factor to report it on the original scale (just dollars) and then divide by `tot_pop.` We can again use `mutate()` to ccomplish this:
 
-```{r}
+
+```r
 # get spending capita in dollars
 hc <- hc %>% 
   mutate(spending_capita = (tot_spending*1e6) / tot_pop)
 
 hc
+```
+
+```
+## # A tibble: 612 x 10
+##    Location  year type  tot_coverage abb   region tot_spending tot_pop
+##    <chr>    <int> <chr>        <int> <chr> <fct>         <dbl>   <int>
+##  1 Alabama   2013 Empl…      2126500 AL    South         33788  4.76e6
+##  2 Alaska    2013 Empl…       364900 AK    West           7684  7.02e5
+##  3 Arizona   2013 Empl…      2883800 AZ    West          41481  6.60e6
+##  4 Arkansas  2013 Empl…      1128800 AR    South         20500  2.90e6
+##  5 Califor…  2013 Empl…     17747300 CA    West         278168  3.82e7
+##  6 Colorado  2013 Empl…      2852500 CO    West          34090  5.30e6
+##  7 Connect…  2013 Empl…      2030500 CT    North…        34223  3.58e6
+##  8 Delaware  2013 Empl…       473700 DE    South          9038  9.09e5
+##  9 Distric…  2013 Empl…       324300 <NA>  <NA>           7443  6.52e5
+## 10 Florida   2013 Empl…      8023400 FL    South        150547  1.94e7
+## # … with 602 more rows, and 2 more variables: prop_coverage <dbl>,
+## #   spending_capita <dbl>
 ```
 
 Yes! At this point we have a single tidy data frame storing all the information we'll need to answer our questions!
@@ -2131,13 +3617,55 @@ For our second case study, we're interested in the following question: At the st
 #### Cenus Data
 
 Let's take a look at the raw data to remind ourselves of what information we have:
-```{r, echo = FALSE}
-census <- read_csv('https://raw.githubusercontent.com/opencasestudies/ocs-police-shootings-firearm-legislation/master/data/sc-est2017-alldata6.csv',
-                   n_max = 236900)
+
+```
+## Parsed with column specification:
+## cols(
+##   SUMLEV = col_character(),
+##   REGION = col_double(),
+##   DIVISION = col_double(),
+##   STATE = col_character(),
+##   NAME = col_character(),
+##   SEX = col_double(),
+##   ORIGIN = col_double(),
+##   RACE = col_double(),
+##   AGE = col_double(),
+##   CENSUS2010POP = col_double(),
+##   ESTIMATESBASE2010 = col_double(),
+##   POPESTIMATE2010 = col_double(),
+##   POPESTIMATE2011 = col_double(),
+##   POPESTIMATE2012 = col_double(),
+##   POPESTIMATE2013 = col_double(),
+##   POPESTIMATE2014 = col_double(),
+##   POPESTIMATE2015 = col_double(),
+##   POPESTIMATE2016 = col_double(),
+##   POPESTIMATE2017 = col_double()
+## )
 ```
 
-```{r}
+
+```r
 census
+```
+
+```
+## # A tibble: 236,844 x 19
+##    SUMLEV REGION DIVISION STATE NAME    SEX ORIGIN  RACE   AGE
+##    <chr>   <dbl>    <dbl> <chr> <chr> <dbl>  <dbl> <dbl> <dbl>
+##  1 040         3        6 01    Alab…     0      0     1     0
+##  2 040         3        6 01    Alab…     0      0     1     1
+##  3 040         3        6 01    Alab…     0      0     1     2
+##  4 040         3        6 01    Alab…     0      0     1     3
+##  5 040         3        6 01    Alab…     0      0     1     4
+##  6 040         3        6 01    Alab…     0      0     1     5
+##  7 040         3        6 01    Alab…     0      0     1     6
+##  8 040         3        6 01    Alab…     0      0     1     7
+##  9 040         3        6 01    Alab…     0      0     1     8
+## 10 040         3        6 01    Alab…     0      0     1     9
+## # … with 236,834 more rows, and 10 more variables: CENSUS2010POP <dbl>,
+## #   ESTIMATESBASE2010 <dbl>, POPESTIMATE2010 <dbl>, POPESTIMATE2011 <dbl>,
+## #   POPESTIMATE2012 <dbl>, POPESTIMATE2013 <dbl>, POPESTIMATE2014 <dbl>,
+## #   POPESTIMATE2015 <dbl>, POPESTIMATE2016 <dbl>, POPESTIMATE2017 <dbl>
 ```
 
 These data look reasonably tidy to start; however, the information stored in each column is not particularly clear at a glance. For example, what is a RACE of 1? What does that mean?
@@ -2168,7 +3696,8 @@ For each state, we add rows in the column `POPESTIMATE2015` since we are looking
 
 We store each of these pieces of information in its own column within the new dataframe we've created `census_stats`
 
-```{r}
+
+```r
 # summarize by ethnicity
 census_stats <- census %>%
   filter(ORIGIN == 0, SEX == 0) %>%
@@ -2203,9 +3732,27 @@ census_stats$NAME <- tolower(census_stats$NAME)
 census_stats
 ```
 
+```
+## # A tibble: 51 x 6
+##    NAME                 white black hispanic  male total_pop
+##    <chr>                <dbl> <dbl>    <dbl> <dbl>     <dbl>
+##  1 alabama               69.5 26.7      4.13  48.5   4850858
+##  2 alaska                66.5  3.67     6.82  52.4    737979
+##  3 arizona               83.5  4.80    30.9   49.7   6802262
+##  4 arkansas              79.6 15.7      7.18  49.1   2975626
+##  5 california            73.0  6.49    38.7   49.7  39032444
+##  6 colorado              87.6  4.47    21.3   50.3   5440445
+##  7 connecticut           80.9 11.6     15.3   48.8   3593862
+##  8 delaware              70.3 22.5      8.96  48.4    944107
+##  9 district of columbia  44.1 48.5     10.7   47.4    672736
+## 10 florida               77.7 16.9     24.7   48.9  20268567
+## # … with 41 more rows
+```
+
 We can approach the age data similarly, where se get the number of people within each state at each age:
 
-```{r}
+
+```r
 # get state-level age information
 age_stats <- census %>%
   filter(ORIGIN == 0, SEX == 0) %>%
@@ -2215,17 +3762,66 @@ age_stats <- census %>%
 age_stats
 ```
 
+```
+## # A tibble: 4,386 x 3
+## # Groups:   NAME [51]
+##    NAME      AGE sum_ages
+##    <chr>   <dbl>    <dbl>
+##  1 Alabama     0    59080
+##  2 Alabama     1    58738
+##  3 Alabama     2    57957
+##  4 Alabama     3    58800
+##  5 Alabama     4    59329
+##  6 Alabama     5    59610
+##  7 Alabama     6    59977
+##  8 Alabama     7    62282
+##  9 Alabama     8    62175
+## 10 Alabama     9    61249
+## # … with 4,376 more rows
+```
+
 This information is in a long format, but it likely makes more sense to store this information in a wide format, where each column is a different state and each row is an age. To do this:
 
-```{r}
+
+```r
 age_stats <- spread(age_stats, "NAME", "sum_ages")
 
 age_stats
 ```
 
+```
+## # A tibble: 86 x 52
+##      AGE Alabama Alaska Arizona Arkansas California Colorado Connecticut
+##    <dbl>   <dbl>  <dbl>   <dbl>    <dbl>      <dbl>    <dbl>       <dbl>
+##  1     0   59080  11253   86653    38453     500834    66222       36414
+##  2     1   58738  11109   86758    38005     499070    66528       36559
+##  3     2   57957  11009   86713    37711     499614    66144       36887
+##  4     3   58800  10756   86914    38381     498536    67065       37745
+##  5     4   59329  10895   87624    38443     510026    68443       38962
+##  6     5   59610  10537   87234    38582     498754    69823       39182
+##  7     6   59977  10352   89215    38630     497444    69691       39871
+##  8     7   62282  10431   93236    40141     516916    71415       41438
+##  9     8   62175  10302   93866    40677     518117    72384       42359
+## 10     9   61249  10055   92531    39836     511610    72086       43032
+## # … with 76 more rows, and 44 more variables: Delaware <dbl>, `District of
+## #   Columbia` <dbl>, Florida <dbl>, Georgia <dbl>, Hawaii <dbl>,
+## #   Idaho <dbl>, Illinois <dbl>, Indiana <dbl>, Iowa <dbl>, Kansas <dbl>,
+## #   Kentucky <dbl>, Louisiana <dbl>, Maine <dbl>, Maryland <dbl>,
+## #   Massachusetts <dbl>, Michigan <dbl>, Minnesota <dbl>,
+## #   Mississippi <dbl>, Missouri <dbl>, Montana <dbl>, Nebraska <dbl>,
+## #   Nevada <dbl>, `New Hampshire` <dbl>, `New Jersey` <dbl>, `New
+## #   Mexico` <dbl>, `New York` <dbl>, `North Carolina` <dbl>, `North
+## #   Dakota` <dbl>, Ohio <dbl>, Oklahoma <dbl>, Oregon <dbl>,
+## #   Pennsylvania <dbl>, `Rhode Island` <dbl>, `South Carolina` <dbl>,
+## #   `South Dakota` <dbl>, Tennessee <dbl>, Texas <dbl>, Utah <dbl>,
+## #   Vermont <dbl>, Virginia <dbl>, Washington <dbl>, `West
+## #   Virginia` <dbl>, Wisconsin <dbl>, Wyoming <dbl>
+```
+
 Now that we’ve made the data easier to work with, we need to find a way to get the median. One method is to take the cumulative sum of each column and then divide all the rows by the last row in each repective column, calculating a percentile/quantile for each age. To do this, we first remove the AGE column, as we don't want to calculate the median for this column. We tehn apply the `cumsum()` function and an anonymous function using `purrr`'s `map_df` function. But, of course, we do still want the AGE information in there, so we add that column back in using `mutate()` and then reorder the columns so that AGE is at the front again using `select()`:
 
-```{r}
+
+```r
 # calculate median age for each state
 age_stats <- age_stats %>%
   select(-AGE) %>%
@@ -2241,44 +3837,93 @@ Great, we have a tidy dataset storing important census information for both ethn
 
 For crime, we have the following data:
 
-```{r, message = FALSE, echo = FALSE, include = FALSE}
-# specify URL to file
-url = "https://github.com/opencasestudies/ocs-police-shootings-firearm-legislation/blob/master/data/table_5_crime_in_the_united_states_by_state_2015.xls?raw=true"
 
-# Use httr's GET() and read_excel() to read in file
-httr::GET(url, httr::write_disk(tf <- tempfile(fileext = ".xls")))
-crime <- readxl::read_excel(tf, sheet = 1, skip = 3)
 
-# see data
+
+```r
 crime
 ```
 
-```{r}
-crime
+```
+## # A tibble: 510 x 14
+##    State Area  ...3  Population `Violent\ncrime… `Murder and \nn…
+##    <chr> <chr> <chr> <chr>                 <dbl>            <dbl>
+##  1 ALAB… Metr… <NA>  3708033                  NA               NA
+##  2 <NA>  <NA>  Area… 0.9709999…            18122              283
+##  3 <NA>  <NA>  Esti… 1                     18500              287
+##  4 <NA>  Citi… <NA>  522241                   NA               NA
+##  5 <NA>  <NA>  Area… 0.9739999…             3178               32
+##  6 <NA>  <NA>  Esti… 1                      3240               33
+##  7 <NA>  Nonm… <NA>  628705                   NA               NA
+##  8 <NA>  <NA>  Area… 0.9939999…             1205               28
+##  9 <NA>  <NA>  Esti… 1                      1212               28
+## 10 <NA>  Stat… <NA>  4858979               22952              348
+## # … with 500 more rows, and 8 more variables:
+## #   `Rape\n(revised\ndefinition)2` <dbl>,
+## #   `Rape\n(legacy\ndefinition)3` <dbl>, Robbery <dbl>, `Aggravated
+## #   \nassault` <dbl>, `Property \ncrime` <dbl>, Burglary <dbl>,
+## #   `Larceny-\ntheft` <dbl>, `Motor \nvehicle \ntheft` <dbl>
 ```
 
 IF we take a look at what information is stored in each column...
 
-```{r}
+
+```r
 colnames(crime)
+```
+
+```
+##  [1] "State"                                   
+##  [2] "Area"                                    
+##  [3] "...3"                                    
+##  [4] "Population"                              
+##  [5] "Violent\ncrime1"                         
+##  [6] "Murder and \nnonnegligent \nmanslaughter"
+##  [7] "Rape\n(revised\ndefinition)2"            
+##  [8] "Rape\n(legacy\ndefinition)3"             
+##  [9] "Robbery"                                 
+## [10] "Aggravated \nassault"                    
+## [11] "Property \ncrime"                        
+## [12] "Burglary"                                
+## [13] "Larceny-\ntheft"                         
+## [14] "Motor \nvehicle \ntheft"
 ```
 
 you see that it's kind of a mess and there's a whole bunch of information in there that we're not necessarily interested in for this analysis.
 
 Because of the messy names here (we'll clean them up in a bit), we'll se the column index to select columns instead of the complicated names. Also, we print a specified row of violent crime to observe the `X__1` group we are looking for – Rate per 100,000 inhabitants (per the study.)
 
-```{r}
+
+```r
 violentcrime <- crime %>% 
   select(c(1,3,5))
 
 violentcrime
 ```
 
+```
+## # A tibble: 510 x 3
+##    State   ...3                    `Violent\ncrime1`
+##    <chr>   <chr>                               <dbl>
+##  1 ALABAMA <NA>                                   NA
+##  2 <NA>    Area actually reporting             18122
+##  3 <NA>    Estimated total                     18500
+##  4 <NA>    <NA>                                   NA
+##  5 <NA>    Area actually reporting              3178
+##  6 <NA>    Estimated total                      3240
+##  7 <NA>    <NA>                                   NA
+##  8 <NA>    Area actually reporting              1205
+##  9 <NA>    Estimated total                      1212
+## 10 <NA>    <NA>                                22952
+## # … with 500 more rows
+```
+
 Great, so we're starting to home in on the data we're interested in but we're ultimately interested in Rate per 100,000 inhabitants, so we need get all rows where the second column is equal to `Rate per 100,000 inhabitants`. 
 
 However, as we can see above, the value for State in these rows is `NA`, so we need to `fill()` that value with the state name that is listed in a previous row. Then we can select the rows where the second column is `Rate per 100,000 inhabitants`. After that, we no longer need the second column, so we'll remove it.
 
-```{r}
+
+```r
 violentcrime <- violentcrime %>% 
   fill(State) %>%
   filter(.[[2]] == "Rate per 100,000 inhabitants") %>%
@@ -2288,15 +3933,38 @@ violentcrime <- violentcrime %>%
 violentcrime
 ```
 
+```
+## # A tibble: 52 x 2
+##    State                 violent_crime
+##    <chr>                         <dbl>
+##  1 ALABAMA                        472.
+##  2 ALASKA                         730.
+##  3 ARIZONA                        410.
+##  4 ARKANSAS                       521.
+##  5 CALIFORNIA                     426.
+##  6 COLORADO                       321 
+##  7 CONNECTICUT                    218.
+##  8 DELAWARE                       499 
+##  9 DISTRICT OF COLUMBIA4         1269.
+## 10 FLORIDA                        462.
+## # … with 42 more rows
+```
+
 If we look closely at our data, we'll notice that some of our state names have 6s at the end of them. This will cause problems later on. 
 
-```{r}
+
+```r
 violentcrime$State[20]
+```
+
+```
+## [1] "MAINE6"
 ```
 
 So, let's clean that up now be removing those trailing numerics *and* converting the names to lower case:
 
-```{r}
+
+```r
 # lower case and remove numbers from State column
 violentcrime <- violentcrime %>%
   mutate(State = tolower(gsub('[0-9]+', '', State)))
@@ -2304,14 +3972,49 @@ violentcrime <- violentcrime %>%
 violentcrime
 ```
 
+```
+## # A tibble: 52 x 2
+##    State                violent_crime
+##    <chr>                        <dbl>
+##  1 alabama                       472.
+##  2 alaska                        730.
+##  3 arizona                       410.
+##  4 arkansas                      521.
+##  5 california                    426.
+##  6 colorado                      321 
+##  7 connecticut                   218.
+##  8 delaware                      499 
+##  9 district of columbia         1269.
+## 10 florida                       462.
+## # … with 42 more rows
+```
+
 We've now got ourselves a tidy dataset with violent crime information that's ready to be joined with our census_stats data!
 
-```{r}
+
+```r
 # join with census data
 firearms <- left_join(census_stats, violentcrime, 
                   by = c("NAME" = "State"))
 
 firearms
+```
+
+```
+## # A tibble: 51 x 7
+##    NAME                 white black hispanic  male total_pop violent_crime
+##    <chr>                <dbl> <dbl>    <dbl> <dbl>     <dbl>         <dbl>
+##  1 alabama               69.5 26.7      4.13  48.5   4850858          472.
+##  2 alaska                66.5  3.67     6.82  52.4    737979          730.
+##  3 arizona               83.5  4.80    30.9   49.7   6802262          410.
+##  4 arkansas              79.6 15.7      7.18  49.1   2975626          521.
+##  5 california            73.0  6.49    38.7   49.7  39032444          426.
+##  6 colorado              87.6  4.47    21.3   50.3   5440445          321 
+##  7 connecticut           80.9 11.6     15.3   48.8   3593862          218.
+##  8 delaware              70.3 22.5      8.96  48.4    944107          499 
+##  9 district of columbia  44.1 48.5     10.7   47.4    672736         1269.
+## 10 florida               77.7 16.9     24.7   48.9  20268567          462.
+## # … with 41 more rows
 ```
 
 #### Brady Scores
@@ -2320,22 +4023,41 @@ The study by AJPH groups the scores using 7 different categories. The study remo
 
 For the purpose of practice and simplification we will just keep the first line of “total state points” from the Brady Scorecard as they are given. This will be where our analysis differs from the study. We need to transform the data frame so that we have a column of state names and a column of the corresponding total scores.
 
-```{r include = FALSE}
-# specify URL to file
-url = "https://github.com/opencasestudies/ocs-police-shootings-firearm-legislation/blob/master/data/Brady-State-Scorecard-2015.xlsx?raw=true"
 
-# Use httr's GET() and read_excel() to read in file
-httr::GET(url, httr::write_disk(tf <- tempfile(fileext = ".xlsx")))
-brady <- readxl::read_excel(tf, sheet = 1)
+
+
+```r
+brady
 ```
 
-```{r}
-brady
+```
+## # A tibble: 116 x 54
+##    `States can rec… `Category Point… `Sub Category P… Points AL    AK   
+##    <chr>                       <dbl>            <dbl>  <dbl> <chr> <chr>
+##  1 TOTAL STATE POI…               NA               NA     NA -18   -30  
+##  2 CATEGORY 1:  KE…               50               NA     NA <NA>  <NA> 
+##  3 BACKGROUND CHEC…               NA               25     NA AL    AK   
+##  4 Background Chec…               NA               NA     25 <NA>  <NA> 
+##  5 Background Chec…               NA               NA     20 <NA>  <NA> 
+##  6 Background Chec…               NA               NA      5 <NA>  <NA> 
+##  7 Verifiy Legal P…               NA               NA     20 <NA>  <NA> 
+##  8 TOTAL                          NA               NA     NA 0     0    
+##  9 <NA>                           NA               NA     NA <NA>  <NA> 
+## 10 OTHER LAWS TO S…               NA               12     NA AL    AK   
+## # … with 106 more rows, and 48 more variables: AR <chr>, AZ <chr>,
+## #   CA <chr>, CO <chr>, CT <chr>, DE <chr>, FL <chr>, GA <chr>, HI <chr>,
+## #   ID <chr>, IL <chr>, IN <chr>, IA <chr>, KS <chr>, KY <chr>, LA <chr>,
+## #   MA <chr>, MD <chr>, ME <chr>, MI <chr>, MN <chr>, MO <chr>, MT <chr>,
+## #   MS <chr>, NC <chr>, ND <chr>, NE <chr>, NH <chr>, NJ <chr>, NM <chr>,
+## #   NV <chr>, NY <chr>, OK <chr>, OH <chr>, OR <chr>, PA <chr>, RI <chr>,
+## #   SC <chr>, SD <chr>, TN <chr>, TX <chr>, UT <chr>, VA <chr>, VT <chr>,
+## #   WA <chr>, WI <chr>, WV <chr>, WY <chr>
 ```
 
 This dataset inclues a lot of information, but we're interested in the brady scores for each state. These are stored in the row where the first column is equal to "TOTAL STATE POINTS," so we `filter()` to only include that row. We then want to only receive the scores for each state, and not the information in the first few columns, so we specify that using `select()`. With the information we're interested in, we then take the data from wide to long using `gather()`, renaming the columns as we go. Finally, we specify that the information in the `brady_scores` column is numeric, not a character.
 
-```{r}
+
+```r
 brady <- brady %>%
   rename(Law = `States can receive a maximum of 100 points`) %>% 
   filter(Law == "TOTAL STATE POINTS") %>%
@@ -2346,22 +4068,75 @@ brady <- brady %>%
 brady
 ```
 
+```
+## # A tibble: 50 x 2
+##    state brady_scores
+##    <chr>        <dbl>
+##  1 AL           -18  
+##  2 AK           -30  
+##  3 AR           -24  
+##  4 AZ           -39  
+##  5 CA            76  
+##  6 CO            22  
+##  7 CT            73  
+##  8 DE            41  
+##  9 FL           -20.5
+## 10 GA           -18  
+## # … with 40 more rows
+```
+
 Only problem now is that we have the two letter state code, rather than the full state name we've been joining on so far here. We can, however, use the `state` datasets we used in the first case study here!
 
-```{r}
+
+```r
 brady <- brady %>% 
   mutate(state = tolower(state.name[match(brady$state, state.abb)]))
 
 brady
 ```
 
+```
+## # A tibble: 50 x 2
+##    state       brady_scores
+##    <chr>              <dbl>
+##  1 alabama            -18  
+##  2 alaska             -30  
+##  3 arkansas           -24  
+##  4 arizona            -39  
+##  5 california          76  
+##  6 colorado            22  
+##  7 connecticut         73  
+##  8 delaware            41  
+##  9 florida            -20.5
+## 10 georgia            -18  
+## # … with 40 more rows
+```
+
 
 Now, it's time to join this information into our growing dataframe `firearms`:
 
-```{r}
+
+```r
 firearms <- left_join(firearms, brady, by = c("NAME" = "state"))
 
 firearms
+```
+
+```
+## # A tibble: 51 x 8
+##    NAME     white black hispanic  male total_pop violent_crime brady_scores
+##    <chr>    <dbl> <dbl>    <dbl> <dbl>     <dbl>         <dbl>        <dbl>
+##  1 alabama   69.5 26.7      4.13  48.5   4850858          472.        -18  
+##  2 alaska    66.5  3.67     6.82  52.4    737979          730.        -30  
+##  3 arizona   83.5  4.80    30.9   49.7   6802262          410.        -39  
+##  4 arkansas  79.6 15.7      7.18  49.1   2975626          521.        -24  
+##  5 califor…  73.0  6.49    38.7   49.7  39032444          426.         76  
+##  6 colorado  87.6  4.47    21.3   50.3   5440445          321          22  
+##  7 connect…  80.9 11.6     15.3   48.8   3593862          218.         73  
+##  8 delaware  70.3 22.5      8.96  48.4    944107          499          41  
+##  9 distric…  44.1 48.5     10.7   47.4    672736         1269.         NA  
+## 10 florida   77.7 16.9     24.7   48.9  20268567          462.        -20.5
+## # … with 41 more rows
 ```
 
 #### The Counted Fatal Shootings
@@ -2370,27 +4145,44 @@ We're making progress, but we have a ways to go still! Let's get wroking on inco
 
 As a reminder, we have a datasets here with data from 2015:
 
-```{r, include = FALSE}
-# read in the counted data
-counted15 <- read_csv("https://raw.githubusercontent.com/opencasestudies/ocs-police-shootings-firearm-legislation/master/data/the-counted-2015.csv")
+
+
+
+```r
+counted15
 ```
 
-```{r}
-counted15
+```
+## # A tibble: 1,146 x 6
+##    gender raceethnicity   state classification  lawenforcementagen… armed  
+##    <chr>  <chr>           <chr> <chr>           <chr>               <chr>  
+##  1 Male   Black           GA    Death in custo… Chatham County She… No     
+##  2 Male   White           OR    Gunshot         Washington County … Firearm
+##  3 Male   White           HI    Struck by vehi… Kauai Police Depar… No     
+##  4 Male   Hispanic/Latino KS    Gunshot         Wichita Police Dep… No     
+##  5 Male   Asian/Pacific … WA    Gunshot         Mason County Sheri… Firearm
+##  6 Male   White           CA    Gunshot         San Francisco Poli… Non-le…
+##  7 Male   Hispanic/Latino AZ    Gunshot         Chandler Police De… Firearm
+##  8 Male   Hispanic/Latino CO    Gunshot         Evans Police Depar… Other  
+##  9 Male   White           CA    Gunshot         Stockton Police De… Knife  
+## 10 Male   Black           CA    Taser           Los Angeles County… No     
+## # … with 1,136 more rows
 ```
 
 The data from each year are in a simialr format with each row representing a different indvidiual and the columns being consistent between the two datasets.
 
 Because of this consistent format, we can combine these two datasets using `bind_rows()`. By specifying `id = "dataset"`, a column called `dataset` will store which dataset each row came from originally. We can then use `mutate()` and `ifelse()` to conditionally specify the year -- 2015 or 2016 -- from which the data originated. We'll also be sure to change the two letter state abbreviation to the lower case state name, to allow for each merging. 
 
-```{r}
+
+```r
 counted15 <- counted15 %>%
   mutate(state = tolower(state.name[match(state, state.abb)]))
 ```
 
 At this point, we have a lot of information at the individual level, but we'd like to summarize this at the state level by ethnicity, gender, and armed status. The researchers “calculated descriptive statistics for the proportion of victims that were male, armed, and non-White,” so we'll do the same. We can accomplish this using `dplyr`. `tally()` will be particularly helpful here to count the number of observations in each group. We're calculating this for each state as well as calculating the annualized rate per 1,000,000 residents. This utilizes the `total_pop` column from the `census_stats` data frame we used earlier.
 
-```{r}
+
+```r
 # get overall stats
 counted_stats <- counted15 %>%
   group_by(state) %>%
@@ -2414,9 +4206,27 @@ counted_stats <- left_join(counted_stats, gunshot_filtered, by = "state") %>%
 counted_stats
 ```
 
+```
+## # A tibble: 50 x 4
+##    state       gunshot_tally gunshot_filtered gunshot_rate
+##    <chr>               <int>            <int>        <dbl>
+##  1 alabama                18               15        1.86 
+##  2 alaska                  4                4        2.71 
+##  3 arizona                43               37        3.16 
+##  4 arkansas                5                4        0.840
+##  5 california            196              150        2.51 
+##  6 colorado               29               27        2.67 
+##  7 connecticut             2                2        0.278
+##  8 delaware                3                2        1.59 
+##  9 florida                64               54        1.58 
+## 10 georgia                29               25        1.42 
+## # … with 40 more rows
+```
+
 Time to merge this into the data frame we've been compiling:
 
-```{r}
+
+```r
 firearms <- left_join(firearms, counted_stats, by = c("NAME" = "state"))
 ```
 
@@ -2424,24 +4234,34 @@ firearms <- left_join(firearms, counted_stats, by = c("NAME" = "state"))
 
 Let's recall the table we scraped from the web, which is currently storing our unemployment data:
 
-```{r, include = FALSE}
-# specify URL to where we'll be web scraping
-url <- read_html("https://www.bls.gov/lau/lastrk15.htm")
-# scrape specific table desired
-out <- html_nodes(url, "table") %>%
-  .[2] %>%
-  html_table(fill = TRUE) 
-# store as a tibble
-unemployment <- as_tibble(out[[1]]) 
+
+
+
+```r
+unemployment
 ```
 
-```{r}
-unemployment
+```
+## # A tibble: 54 x 3
+##    State         `2015rate` Rank 
+##    <chr>         <chr>      <chr>
+##  1 United States 5.3        ""   
+##  2 ""            ""         ""   
+##  3 North Dakota  2.8        1    
+##  4 Nebraska      3.0        2    
+##  5 South Dakota  3.1        3    
+##  6 New Hampshire 3.4        4    
+##  7 Hawaii        3.6        5    
+##  8 Utah          3.6        5    
+##  9 Vermont       3.6        5    
+## 10 Minnesota     3.7        8    
+## # … with 44 more rows
 ```
 
 Let's first rename the columns to clean things up. You'll note that there are more rows in this data frame (due to an empty row, the United States, and a note being in this dataset); however, when we `left_merge()` in just a second these will disappear, so we can ignore them for now.
  
-```{r}
+
+```r
 unemployment <- unemployment %>% 
   rename("state" = "State", 
          "unemployment_rate" = "2015rate", 
@@ -2451,22 +4271,60 @@ unemployment <- unemployment %>%
 
 unemployment
 ```
+
+```
+## # A tibble: 54 x 3
+##    state                unemployment_rate unemployment_rank
+##    <chr>                <chr>             <chr>            
+##  1 ""                   ""                ""               
+##  2 alabama              6.1               42               
+##  3 alaska               6.5               47               
+##  4 arizona              6.1               42               
+##  5 arkansas             5.0               24               
+##  6 california           6.2               44               
+##  7 colorado             3.9               10               
+##  8 connecticut          5.7               35               
+##  9 delaware             4.9               22               
+## 10 district of columbia 6.9               51               
+## # … with 44 more rows
+```
  
 Let's do that join now. Let's add unemployment information to our growing data frame!
 
-```{r}
+
+```r
 firearms <- left_join(firearms, unemployment, by = c("NAME" = "state"))
 ```
 
 If we take a look at the data we now have in our growing data frame, using `glimpse()`, we see that type is correct for most of our variables *except* `unemployment_rate` and `unemployment_rank`. This is due to that "Note" and empty (`""`) row in the unemployment dataset. So, let's be sure to get that variable to a numeric now as it should be: 
 
 
-```{r}
+
+```r
 glimpse(firearms)
 ```
 
+```
+## Observations: 51
+## Variables: 13
+## $ NAME              <chr> "alabama", "alaska", "arizona", "arkansas", "c…
+## $ white             <dbl> 69.50197, 66.51368, 83.52295, 79.57623, 72.975…
+## $ black             <dbl> 26.7459489, 3.6679906, 4.7978011, 15.6634268, …
+## $ hispanic          <dbl> 4.129434, 6.821197, 30.873010, 7.180439, 38.72…
+## $ male              <dbl> 48.46650, 52.36978, 49.71595, 49.12855, 49.678…
+## $ total_pop         <dbl> 4850858, 737979, 6802262, 2975626, 39032444, 5…
+## $ violent_crime     <dbl> 472.4, 730.2, 410.2, 521.3, 426.3, 321.0, 218.…
+## $ brady_scores      <dbl> -18.0, -30.0, -39.0, -24.0, 76.0, 22.0, 73.0, …
+## $ gunshot_tally     <int> 18, 4, 43, 5, 196, 29, 2, 3, NA, 64, 29, 2, 7,…
+## $ gunshot_filtered  <int> 15, 4, 37, 4, 150, 27, 2, 2, NA, 54, 25, 2, 7,…
+## $ gunshot_rate      <dbl> 1.8553419, 2.7101042, 3.1607133, 0.8401593, 2.…
+## $ unemployment_rate <chr> "6.1", "6.5", "6.1", "5.0", "6.2", "3.9", "5.7…
+## $ unemployment_rank <chr> "42", "47", "42", "24", "44", "10", "35", "22"…
+```
 
-```{r}
+
+
+```r
 # convert type for unemployment columns
 firearms <- firearms %>%
   mutate_at("unemployment_rate", as.numeric) %>%
@@ -2481,7 +4339,8 @@ Population density for 2015 can be calculated from the Census data in combinatio
 
 From the census data, we can obtain total population counts:
 
-```{r}
+
+```r
 totalPop <- census %>%
   filter(ORIGIN == 0, SEX == 0 ) %>%
   group_by(NAME) %>%
@@ -2491,19 +4350,30 @@ totalPop <- census %>%
 totalPop
 ```
 
+```
+## # A tibble: 51 x 2
+##    NAME                    total
+##    <chr>                   <dbl>
+##  1 alabama               4850858
+##  2 alaska                 737979
+##  3 arizona               6802262
+##  4 arkansas              2975626
+##  5 california           39032444
+##  6 colorado              5440445
+##  7 connecticut           3593862
+##  8 delaware               944107
+##  9 district of columbia   672736
+## 10 florida              20268567
+## # … with 41 more rows
+```
+
 
 Then, we select `LND110210D` by looking at the `land` table and comparing values on other sites (such as the census or Wikipedia) to find the correct column. This column corresponds to land area in square miles. We'll onvert all state names to lower case for easy merging with our growing data frame in a few steps.
 
-```{r, message = FALSE, echo = FALSE, include = FALSE}
-# specify URL to file
-url = "https://github.com/opencasestudies/ocs-police-shootings-firearm-legislation/blob/master/data/LND01.xls?raw=true"
 
-# Use httr's GET() and read_excel() to read in file
-httr::GET(url, httr::write_disk(tf <- tempfile(fileext = ".xls")))
-land <- readxl::read_excel(tf, sheet = 1)
-```
 
-```{r}
+
+```r
 landSqMi <- land %>%
   select(Areaname, land_area = LND110210D) %>% 
   mutate(Areaname = tolower(Areaname))
@@ -2511,11 +4381,29 @@ landSqMi <- land %>%
 landSqMi
 ```
 
+```
+## # A tibble: 3,198 x 2
+##    Areaname      land_area
+##    <chr>             <dbl>
+##  1 united states  3531905.
+##  2 alabama          50645.
+##  3 autauga, al        594.
+##  4 baldwin, al       1590.
+##  5 barbour, al        885.
+##  6 bibb, al           623.
+##  7 blount, al         645.
+##  8 bullock, al        623.
+##  9 butler, al         777.
+## 10 calhoun, al        606.
+## # … with 3,188 more rows
+```
+
 Since `landSqMi` gives us area for each town in addition to the states, we will want merge on the state names to obtain only the area for each state, removing the city- and nation-level data. Also, because "district of columbia" appears twice, we'll use the `distinct()` function to only include on entry for "district of columbia"
 
 We can then calculate density and remove the `total` and `land_area` columns to only keep state name and density for each state:
 
-```{r}
+
+```r
 popdensity <- left_join(totalPop, landSqMi, by=c("NAME" = "Areaname")) %>% 
   distinct() %>%
   mutate(density = total/land_area) %>%
@@ -2524,9 +4412,27 @@ popdensity <- left_join(totalPop, landSqMi, by=c("NAME" = "Areaname")) %>%
 popdensity
 ```
 
+```
+## # A tibble: 51 x 2
+##    NAME                  density
+##    <chr>                   <dbl>
+##  1 alabama                 95.8 
+##  2 alaska                   1.29
+##  3 arizona                 59.9 
+##  4 arkansas                57.2 
+##  5 california             251.  
+##  6 colorado                52.5 
+##  7 connecticut            742.  
+##  8 delaware               485.  
+##  9 district of columbia 11019.  
+## 10 florida                378.  
+## # … with 41 more rows
+```
+
 This can now be joined with our growing data frame:
 
-```{r}
+
+```r
 firearms <- left_join(firearms, popdensity, by="NAME")
 ```
 
@@ -2535,24 +4441,37 @@ firearms <- left_join(firearms, popdensity, by="NAME")
 
 Last but not least, we calculate firearm ownership as a percent of firearm suicides to all suicides.
 
-```{r, message = FALSE, echo = FALSE, include = FALSE}
-# read in suicide data
-suicide_all <- readr::read_csv("https://raw.githubusercontent.com/opencasestudies/ocs-police-shootings-firearm-legislation/master/data/suicide_all.csv")
-
-# read in firearm suicide data
-suicide_firearm <- readr::read_csv("https://raw.githubusercontent.com/opencasestudies/ocs-police-shootings-firearm-legislation/master/data/suicide_firearm.csv")
-```
 
 
-```{r}
+
+
+```r
 ownership_df <- as_tibble(list("NAME" = tolower(suicide_all$State), 
                           "ownership" = suicide_firearm$Deaths/suicide_all$Deaths*100))
 ownership_df
 ```
 
+```
+## # A tibble: 51 x 2
+##    NAME        ownership
+##    <chr>           <dbl>
+##  1 alabama          70.1
+##  2 alaska           59.9
+##  3 arizona          57.4
+##  4 arkansas         59.5
+##  5 california       37.3
+##  6 colorado         51.0
+##  7 connecticut      27.4
+##  8 delaware         49.8
+##  9 florida          52.0
+## 10 georgia          62.1
+## # … with 41 more rows
+```
+
 This can now be joined onto our tidy, growing data frame:
 
-```{r}
+
+```r
 firearms <- left_join(firearms, ownership_df, by="NAME")
 ```
 

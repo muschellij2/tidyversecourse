@@ -1,3 +1,7 @@
+---
+output: github_document
+---
+
 # What are Tidy Data? {#intro}
 
 Course Objectives:
